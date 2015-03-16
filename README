@@ -1,0 +1,8 @@
+Simple Message Passing Library (SMPL)
+
+This library hopes to be a cross platform, cross language mechanism for
+atomically passing arbitrary finite length messages between threads, processes,
+programs and machines.  Hopefully with consistent syntax and semantics.
+
+The reference implementation is in C++, as well as the initial performance
+benchmarks.
