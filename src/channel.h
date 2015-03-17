@@ -11,6 +11,8 @@ namespace smpl {
 
         public:
 
+            virtual ~Channel() = 0;
+
             virtual std::string send() = 0;
             virtual std::string recv() = 0;
 
