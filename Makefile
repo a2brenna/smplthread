@@ -12,19 +12,25 @@ install:
 
 test: test/client test/server
 
-test/client: client.o
+test/client: client.o unix_domain_socket.o file_descriptor.o
 	mkdir -p test/
-	${CXX} ${CXXFLAGS} -o test/client client.o
+	${CXX} ${CXXFLAGS} -o test/client client.o unix_domain_socket.o file_descriptor.o
 
-test/server: server.o
+test/server: server.o unix_domain_socket.o file_descriptor.o
 	mkdir -p test/
-	${CXX} ${CXXFLAGS} -o test/server server.o
+	${CXX} ${CXXFLAGS} -o test/server server.o unix_domain_socket.o file_descriptor.o
 
 client.o: src/client.cc
 	${CXX} ${CXXFLAGS} -c src/client.cc -o client.o
 
 server.o: src/server.cc
 	${CXX} ${CXXFLAGS} -c src/server.cc -o server.o
+
+file_descriptor.o: src/file_descriptor.cc
+	${CXX} ${CXXFLAGS} -c src/file_descriptor.cc -o file_descriptor.o
+
+unix_domain_socket.o: src/unix_domain_socket.cc
+	${CXX} ${CXXFLAGS} -c src/unix_domain_socket.cc -o unix_domain_socket.o
 
 clean:
 	rm -rf test/

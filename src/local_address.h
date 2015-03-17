@@ -9,7 +9,7 @@ namespace smpl {
 
         public:
 
-            virtual ~Local_Address() = 0;
+            //virtual ~Local_Address() = 0;
             virtual Channel* listen() = 0;
             virtual bool check() = 0;
 
