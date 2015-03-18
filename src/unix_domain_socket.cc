@@ -49,6 +49,11 @@ Local_UDS::Local_UDS(const std::string &new_path){
             throw smpl::Error("Failed to bind socket");
         }
 
+        const int l = ::listen(sockfd, SOMAXCONN);
+        if( l < 0 ){
+            throw smpl::Error("Failed to listen on socket");
+        }
+
     }
 
 }
@@ -62,12 +67,12 @@ Local_UDS::~Local_UDS(){
 
 smpl::Channel* Local_UDS::listen(){
 
-    const int l = ::listen(sockfd, SOMAXCONN);
-    if( l < 0 ){
-        throw smpl::Error("Failed to listen on socket");
+    const int a = accept(sockfd, nullptr, nullptr);
+    if( a < 0 ){
+        throw smpl::Error("Failed to get incoming connection");
     }
 
-    const auto fd = new File_Descriptor(l);
+    const auto fd = new File_Descriptor(a);
 
     if( fd == NULL ){
         throw smpl::Error("Failed to create File_Descriptor");
