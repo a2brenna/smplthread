@@ -4,9 +4,15 @@
 #include "remote_address.h"
 #include "local_address.h"
 
-class Local_UDS : smpl::Local_Address {
+class Local_UDS : public smpl::Local_Address {
+
+    private:
+        std::string path;
+        int sockfd = -1;
 
     public:
+
+        Local_UDS(const std::string &new_path);
 
         virtual ~Local_UDS();
         virtual smpl::Channel* listen();
@@ -14,10 +20,14 @@ class Local_UDS : smpl::Local_Address {
 
 };
 
-class Remote_UDS : smpl::Remote_Address {
+class Remote_UDS : public smpl::Remote_Address {
+
+    private:
+        std::string path;
 
     public:
 
+        Remote_UDS(const std::string &new_path);
         virtual smpl::Channel* connect();
 
 };
