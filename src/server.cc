@@ -13,7 +13,6 @@ int main(){
 
         std::unique_ptr<smpl::Channel> client(server->listen());
         std::string message = client->recv();
-        std::cout << message << std::endl;
 
     }
 
