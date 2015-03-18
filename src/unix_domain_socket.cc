@@ -83,6 +83,25 @@ Remote_UDS::Remote_UDS(const std::string &new_path){
 }
 
 smpl::Channel* Remote_UDS::connect(){
+    const int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if( sockfd < 0 ){
+        throw smpl::Error("Could not open socket");
+    }
 
-    return NULL;
+    struct sockaddr_un remote;
+    remote.sun_family = AF_UNIX;
+    strncpy(remote.sun_path, path.c_str(), UNIX_MAX_PATH);
+    const auto len = strlen(remote.sun_path) + sizeof(remote.sun_family);
+
+    const auto c = ::connect(sockfd, (struct sockaddr *)&remote, len);
+    if( c != 0 ){
+        throw smpl::Error("Error connecting to remote port");
+    }
+
+    const auto fd = new File_Descriptor(sockfd);
+    if( fd == NULL ){
+        throw smpl::Error("Failed to create File_Descriptor");
+    }
+
+    return fd;
 }
