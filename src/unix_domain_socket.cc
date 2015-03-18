@@ -4,6 +4,7 @@
 #include <netdb.h> //for struct addrinfo
 #include <sys/un.h> //for sockaddr_un
 #include <sys/socket.h> //for socket
+#include <unistd.h> //for close
 
 #define UNIX_MAX_PATH 108
 
@@ -49,7 +50,10 @@ Local_UDS::Local_UDS(const std::string &new_path){
 }
 
 Local_UDS::~Local_UDS(){
-
+    const int c = close(sockfd);
+    if(c != 0){
+        throw smpl::Error("Failed to cleanly close socket");
+    }
 }
 
 smpl::Channel* Local_UDS::listen(){
