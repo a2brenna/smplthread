@@ -11,7 +11,7 @@ namespace smpl {
 
         public:
 
-            //virtual ~Channel() = 0;
+            virtual ~Channel() {};
 
             Channel() {};
 
