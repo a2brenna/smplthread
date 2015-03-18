@@ -1,4 +1,5 @@
 #include "unix_domain_socket.h"
+#include "file_descriptor.h"
 #include "error.h"
 
 #include <netdb.h> //for struct addrinfo
@@ -58,7 +59,18 @@ Local_UDS::~Local_UDS(){
 
 smpl::Channel* Local_UDS::listen(){
 
-    return NULL;
+    const int l = ::listen(sockfd, SOMAXCONN);
+    if( l < 0 ){
+        throw smpl::Error("Failed to listen on socket");
+    }
+
+    const auto fd = new File_Descriptor(l);
+
+    if( fd == NULL ){
+        throw smpl::Error("Failed to create File_Descriptor");
+    }
+
+    return fd;
 }
 
 bool Local_UDS::check(){

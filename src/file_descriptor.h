@@ -3,7 +3,7 @@
 
 #include "channel.h"
 
-class File_Descriptor : smpl::Channel {
+class File_Descriptor : public smpl::Channel {
 
     private:
         int _fd;
