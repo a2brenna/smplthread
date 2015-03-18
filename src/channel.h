@@ -13,6 +13,8 @@ namespace smpl {
 
             //virtual ~Channel() = 0;
 
+            Channel() {};
+
             virtual void send(const std::string &msg) = 0;
             virtual std::string recv() = 0;
 

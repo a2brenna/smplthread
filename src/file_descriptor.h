@@ -6,10 +6,12 @@
 class File_Descriptor : smpl::Channel {
 
     private:
+        int _fd;
 
     public:
 
         virtual ~File_Descriptor();
+        File_Descriptor(const int &fd);
 
         virtual void send(const std::string &msg);
         virtual std::string recv();
