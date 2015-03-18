@@ -12,6 +12,9 @@
 Local_UDS::Local_UDS(const std::string &new_path){
 
     path = new_path;
+    if ( path.size() > UNIX_MAX_PATH ){
+        throw smpl::Error("Path too long");
+    }
 
     {
         struct addrinfo res;
@@ -80,6 +83,9 @@ bool Local_UDS::check(){
 
 Remote_UDS::Remote_UDS(const std::string &new_path){
     path = new_path;
+    if ( path.size() > UNIX_MAX_PATH ){
+        throw smpl::Error("Path too long");
+    }
 }
 
 smpl::Channel* Remote_UDS::connect(){
