@@ -31,5 +31,30 @@ void File_Descriptor::send(const std::string &msg){
 
 std::string File_Descriptor::recv(){
 
-    return "";
+    uint32_t net_length;
+
+    if ( ::recv(_fd, &net_length, 4, MSG_NOSIGNAL) != 4){
+        throw smpl::Error("Failed to receive msg length");
+    }
+
+    uint32_t bytes_remaining = ntohl(net_length);
+
+    std::string msg;
+
+    while (msg.length() < bytes_remaining) {
+        //PERHAPS REIMPLEMENT USING std::array<char>?
+        char buff[4096];
+        size_t to_read = std::min((unsigned long)4096, bytes_remaining - msg.length());
+
+        const int ret = ::recv(_fd, buff, to_read, MSG_NOSIGNAL);
+        if (ret < 0) {
+            throw smpl::Error("Recv loop failed");
+        }
+        else {
+            msg.append(buff, ret);
+        }
+    }
+
+
+    return msg;
 }
