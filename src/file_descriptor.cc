@@ -4,6 +4,8 @@
 #include <arpa/inet.h> //for htonl
 #include <unistd.h>
 
+#define READ_WINDOW 4096
+
 
 File_Descriptor::~File_Descriptor(){
     const int c = close(_fd);
@@ -43,8 +45,8 @@ std::string File_Descriptor::recv(){
 
     while (msg.length() < bytes_remaining) {
         //PERHAPS REIMPLEMENT USING std::array<char>?
-        char buff[4096];
-        size_t to_read = std::min((unsigned long)4096, bytes_remaining - msg.length());
+        char buff[READ_WINDOW];
+        size_t to_read = std::min((unsigned long)READ_WINDOW, bytes_remaining - msg.length());
 
         const int ret = ::recv(_fd, buff, to_read, MSG_NOSIGNAL);
         if (ret < 0) {
