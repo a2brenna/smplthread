@@ -7,14 +7,15 @@
 
 int main(){
     std::string message;
-    for(int i = 0; i < 10000000; i++){
-        message.append("Hello");
-    }
+    message.append("Hello");
+
+    std::unique_ptr<smpl::Remote_Address> server_address( new Remote_UDS("/tmp/channel_test.sock"));
 
     const auto start_time = std::chrono::high_resolution_clock::now();
-    std::unique_ptr<smpl::Remote_Address> server_address( new Remote_UDS("/tmp/channel_test.sock"));
-    std::unique_ptr<smpl::Channel> server( server_address->connect() );
-    server->send(message);
+    for(int i = 0; i < 1000000; i++){
+        std::unique_ptr<smpl::Channel> server( server_address->connect() );
+        server->send(message);
+    }
     const auto end_time = std::chrono::high_resolution_clock::now();
 
     std::cout << "Elapsed " << (end_time - start_time).count() << std::endl;

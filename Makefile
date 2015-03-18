@@ -4,7 +4,7 @@ DESDTIR=/
 PREFIX=/usr
 
 CXX=clang++
-CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -g -std=c++11 -fPIC -Wall -Wextra
+CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -g -std=c++11 -fPIC -Wall -Wextra -O2 -march=native
 
 all: test
 
