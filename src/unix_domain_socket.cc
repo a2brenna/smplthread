@@ -63,6 +63,10 @@ Local_UDS::~Local_UDS(){
     if(c != 0){
         throw smpl::Error("Failed to cleanly close socket");
     }
+    const int u = remove(path.c_str());
+    if(u < 0){
+        throw smpl::Error("Failed to remove unix domain file");
+    }
 }
 
 smpl::Channel* Local_UDS::listen(){
