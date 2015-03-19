@@ -4,6 +4,7 @@
 #include "remote_address.h"
 #include "local_address.h"
 #include "channel.h"
+#include "error.h"
 
 #include <mutex>
 #include <memory>
@@ -42,6 +43,14 @@ class Uni_Directional_Channel {
         std::string msg;
         std::mutex write_lock;
 
+        std::mutex master_lock;
+        bool closed = false;
+
+        bool is_closed(){
+            std::lock_guard<std::mutex> l(master_lock);
+            return closed;
+        };
+
 
     public:
         Uni_Directional_Channel(){
@@ -49,6 +58,9 @@ class Uni_Directional_Channel {
             read_lock.lock();
         };
         void send(const std::string &next_msg){
+            if(is_closed()){
+                throw smpl::Error("Closed Channel");
+            }
             {
                 std::unique_lock<std::mutex> l_a(write_lock);
                 msg = next_msg;
@@ -78,6 +90,16 @@ class Uni_Directional_Channel {
             //write_lock unlocked
             //read_lock locked
             return m;
+        };
+        void close(){
+            read_lock.lock();
+            write_lock.lock();
+            {
+                std::lock_guard<std::mutex> l(master_lock);
+                closed = true;
+            }
+            read_lock.unlock();
+            write_lock.unlock();
         };
 };
 
