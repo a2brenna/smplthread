@@ -8,7 +8,6 @@
 #include <unistd.h> //for close
 #include <memory> //for unique_ptr
 
-//#include <sys/types.h> //for getaddrinfo()
 #include <sstream>
 
 Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
@@ -98,7 +97,7 @@ smpl::Channel* Remote_Port::connect(){
     const std::string port_string = s.str();
 
     struct addrinfo hints;
-    memset(&hints, '\0', sizeof(struct addrinfo) );
+    memset(&hints, 0, sizeof(hints) );
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
 
@@ -112,14 +111,19 @@ smpl::Channel* Remote_Port::connect(){
     }
     std::unique_ptr<struct addrinfo> res(r);
 
-    const int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (sockfd < 0) {
-        throw smpl::Error("Failed to open socket");
-    }
+    int sockfd = -1;
+    for(auto s = res.get(); s != nullptr; s = s->ai_next){
+        sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (sockfd < 0) {
+            throw smpl::Error("Failed to open socket");
+        }
 
-    const int c = ::connect(sockfd, res->ai_addr, res->ai_addrlen);
-    if (c != 0) {
-        close(sockfd);
+        const int c = ::connect(sockfd, res->ai_addr, res->ai_addrlen);
+        if (c < 0) {
+            close(sockfd);
+        }
+    }
+    if(sockfd < 0){
         throw smpl::Error("Failed to connect");
     }
 
