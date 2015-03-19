@@ -8,23 +8,30 @@ std::mutex connection_queues_lock;
 std::map<pthread_t, std::deque<pthread_t>> connection_queues;
 
 Thread_Listener::Thread_Listener(){
-
+    _self = pthread_self();
+    std::lock_guard<std::mutex> l(connection_queues_lock);
+    connection_queues[_self];
 }
 
 Thread_Listener::~Thread_Listener(){
-
+    std::lock_guard<std::mutex> l(connection_queues_lock);
+    connection_queues.erase(_self);
 }
 
 smpl::Channel* Thread_Listener::listen(){
+    std::lock_guard<std::mutex> l(connection_queues_lock);
+    const pthread_t peer = connection_queues[_self].front();
+    connection_queues[_self].pop_front();
     return nullptr;
 }
 
 bool Thread_Listener::check(){
-    return false;
+    std::lock_guard<std::mutex> l(connection_queues_lock);
+    return ( !connection_queues[_self].empty() );
 }
 
 Thread_ID::Thread_ID(const pthread_t &peer){
-
+    _peer = peer;
 }
 
 smpl::Channel* Thread_ID::connect(){
