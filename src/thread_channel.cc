@@ -53,6 +53,10 @@ class Duplex{
     public:
         std::shared_ptr<One_Way> server_receiver;
         std::shared_ptr<One_Way> client_receiver;
+        Duplex(){
+            server_receiver = nullptr;
+            client_receiver = nullptr;
+        }
 
 };
 
