@@ -48,6 +48,25 @@ class One_Way {
         };
 };
 
+class Duplex{
+
+    public:
+        std::shared_ptr<One_Way> server_receiver;
+        std::shared_ptr<One_Way> client_receiver;
+
+};
+
+class Waiting_Connection{
+
+    public:
+        std::mutex _m;
+        std::condition_variable _c;
+
+        Duplex connection;
+
+};
+
+
 std::mutex connection_queues_lock;
 std::map<pthread_t, std::deque<pthread_t>> connection_queues;
 
