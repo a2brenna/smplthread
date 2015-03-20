@@ -4,6 +4,50 @@
 #include <deque>
 #include <mutex>
 
+class One_Way {
+
+    private:
+
+        bool closed = false;
+        std::deque<std::string> _msgs;
+        std::mutex _msg_q_lock;
+
+        std::condition_variable _has_msg;
+
+    public:
+        One_Way(){
+        };
+        void send(const std::string &next_msg){
+            {
+                std::unique_lock<std::mutex> l(_msg_q_lock);
+                if(closed){
+                    throw smpl::Error("Closed");
+                }
+                else{
+                    _msgs.push_back(next_msg);
+                }
+            }
+            _has_msg.notify_one();
+        };
+        std::string recv(){
+            std::unique_lock<std::mutex> l(_msg_q_lock);
+            while(_msgs.empty()){
+                _has_msg.wait(l);
+                if(closed){
+                    throw smpl::Error("Closed");
+                }
+            }
+            const std::string m = _msgs.front();
+            _msgs.pop_front();
+            return m;
+        };
+        void close(){
+            std::lock_guard<std::mutex> l(_msg_q_lock);
+            closed = true;
+            _has_msg.notify_all();
+        };
+};
+
 std::mutex connection_queues_lock;
 std::map<pthread_t, std::deque<pthread_t>> connection_queues;
 
