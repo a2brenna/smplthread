@@ -72,7 +72,7 @@ class Waiting_Connection{
 
 
 std::mutex connection_queues_lock;
-std::map<pthread_t, std::deque<pthread_t>> connection_queues;
+std::map<pthread_t, std::deque<std::shared_ptr<Waiting_Connection>>> connection_queues;
 
 Thread_Listener::Thread_Listener(){
     _self = pthread_self();
@@ -86,10 +86,41 @@ Thread_Listener::~Thread_Listener(){
 }
 
 smpl::Channel* Thread_Listener::listen(){
-    std::lock_guard<std::mutex> l(connection_queues_lock);
-    const pthread_t peer = connection_queues[_self].front();
-    connection_queues[_self].pop_front();
-    return nullptr;
+    std::shared_ptr<One_Way> receiver(new One_Way());
+    std::shared_ptr<One_Way> sender;
+    std::shared_ptr<Waiting_Connection> foo;
+    {
+        {
+            std::unique_lock<std::mutex> l(connection_queues_lock);
+            if(connection_queues[_self].empty()){ //No client currently blocked connecting
+                std::shared_ptr<Waiting_Connection> w(new Waiting_Connection());
+                connection_queues[_self].push_back(w);
+
+            }
+            foo = connection_queues[_self].front();
+        }
+        {
+            //CONDITION VARIABLE SHENANIGANS
+            std::unique_lock<std::mutex> l(foo->_m);
+            foo->connection.server_receiver = receiver;
+            if(foo->connection.client_receiver == nullptr){
+                //wait
+                foo->_c.wait(l);
+                sender = foo->connection.client_receiver;
+            }
+            else{
+                //signal
+                sender = foo->connection.client_receiver;
+                foo->_c.notify_one();
+            }
+        }
+        {
+            std::unique_lock<std::mutex> l(connection_queues_lock);
+            connection_queues[_self].pop_front();
+        }
+    }
+
+    return (new Thread_Channel(sender, receiver));
 }
 
 bool Thread_Listener::check(){
@@ -102,11 +133,41 @@ Thread_ID::Thread_ID(const pthread_t &peer){
 }
 
 smpl::Channel* Thread_ID::connect(){
-    return nullptr;
-}
+    std::shared_ptr<One_Way> receiver(new One_Way());
+    std::shared_ptr<One_Way> sender;
+    std::shared_ptr<Waiting_Connection> foo;
+    {
+        try{
+            std::unique_lock<std::mutex> l(connection_queues_lock);
+            if(connection_queues.at(_peer).empty() || connection_queues.at(_peer).front()->connection.server_receiver == nullptr){ //server not blocked or we're not next in line
+                std::shared_ptr<Waiting_Connection> w(new Waiting_Connection());
+                connection_queues.at(_peer).push_back(w);
+            }
+            else{ //server is blocked listening and we're next
+                foo = connection_queues.at(_peer).front();
+            }
+        }
+        catch(std::out_of_range o){
+            throw smpl::Error("No listening thread");
+        }
+        {
+            //CONDITION VARIABLE SHENANIGANS
+            std::unique_lock<std::mutex> l(foo->_m);
+            foo->connection.client_receiver = receiver;
+            if(foo->connection.server_receiver == nullptr){
+                //wait
+                foo->_c.wait(l);
+                sender = foo->connection.server_receiver;
+            }
+            else{
+                //signal
+                sender = foo->connection.server_receiver;
+                foo->_c.notify_one();
+            }
+        }
+    }
 
-Thread_Channel::Thread_Channel(std::shared_ptr<One_Way> _sender, std::shared_ptr<One_Way> _receiver){
-
+    return (new Thread_Channel(sender, receiver));
 }
 
 Thread_Channel::Thread_Channel(std::shared_ptr<One_Way> sender, std::shared_ptr<One_Way> receiver){
