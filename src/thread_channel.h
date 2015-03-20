@@ -6,7 +6,8 @@
 #include "channel.h"
 #include "error.h"
 
-#include <mutex>
+#include <deque>
+#include <condition_variable>
 #include <memory>
 
 class Thread_Listener : public smpl::Local_Address {
@@ -36,80 +37,59 @@ class Thread_ID : public smpl::Remote_Address {
 
 };
 
-class Uni_Directional_Channel {
+class One_Way {
 
     private:
-        std::mutex read_lock;
-        std::string msg;
-        std::mutex write_lock;
 
-        std::mutex master_lock;
         bool closed = false;
+        std::deque<std::string> _msgs;
+        std::mutex _msg_q_lock;
 
-        bool is_closed(){
-            std::lock_guard<std::mutex> l(master_lock);
-            return closed;
-        };
-
+        std::condition_variable _has_msg;
 
     public:
-        Uni_Directional_Channel(){
-            write_lock.unlock();
-            read_lock.lock();
+        One_Way(){
         };
         void send(const std::string &next_msg){
-            if(is_closed()){
-                throw smpl::Error("Closed Channel");
-            }
             {
-                std::unique_lock<std::mutex> l_a(write_lock);
-                msg = next_msg;
-                read_lock.unlock();
-
-                //write_lock locked
-                //read_lock unlocked
-
-                l_a.release();
-                //re-acquire write_lock, forces waiting until write_lock.unlock() is called in reader
-                std::unique_lock<std::mutex> l_b(write_lock);
-                //read_lock is locked again by here
+                std::unique_lock<std::mutex> l(_msg_q_lock);
+                if(closed){
+                    throw smpl::Error("Closed");
+                }
+                else{
+                    _msgs.push_back(next_msg);
+                }
             }
-            //write_lock unlocked
-            //read_lock locked
+            _has_msg.notify_one();
         };
         std::string recv(){
-            std::string m;
-            {
-                std::unique_lock<std::mutex> l(read_lock);
-                m = msg;
-                l.release(); //read_lock stays locked, waiting for a sender to unlock it
-                //write_lock locked
-                //read_lock locked
+            std::unique_lock<std::mutex> l(_msg_q_lock);
+            while(_msgs.empty()){
+                _has_msg.wait(l);
+                if(closed){
+                    throw smpl::Error("Closed");
+                }
             }
-            write_lock.unlock(); //unlock since its now safe to overwrite msg
-            //write_lock unlocked
-            //read_lock locked
+            const std::string m = _msgs.front();
+            _msgs.pop_front();
             return m;
         };
         void close(){
-            read_lock.lock();
-            write_lock.lock();
-            {
-                std::lock_guard<std::mutex> l(master_lock);
-                closed = true;
-            }
-            read_lock.unlock();
-            write_lock.unlock();
+            std::lock_guard<std::mutex> l(_msg_q_lock);
+            closed = true;
+            _has_msg.notify_all();
         };
 };
 
 class Thread_Channel: public smpl::Channel {
 
     private:
+        std::shared_ptr<One_Way> _sender;
+        std::shared_ptr<One_Way> _receiver;
 
     public:
 
-        Thread_Channel();
+        Thread_Channel(std::shared_ptr<One_Way> _sender, std::shared_ptr<One_Way> _receiver);
         virtual ~Thread_Channel();
 
         virtual void send(const std::string &msg);

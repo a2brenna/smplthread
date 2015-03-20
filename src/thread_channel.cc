@@ -38,7 +38,7 @@ smpl::Channel* Thread_ID::connect(){
     return nullptr;
 }
 
-Thread_Channel::Thread_Channel(){
+Thread_Channel::Thread_Channel(std::shared_ptr<One_Way> _sender, std::shared_ptr<One_Way> _receiver){
 
 }
 
