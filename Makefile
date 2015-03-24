@@ -14,7 +14,7 @@ test: test/client test/server
 
 test/client: client.o unix_domain_socket.o file_descriptor.o network_socket.o thread_channel.o
 	mkdir -p test/
-	${CXX} ${CXXFLAGS} -o test/client client.o unix_domain_socket.o file_descriptor.o network_socket.o thread_channel.o
+	${CXX} ${CXXFLAGS} -o test/client client.o unix_domain_socket.o file_descriptor.o network_socket.o thread_channel.o -lpthread
 
 test/server: server.o unix_domain_socket.o file_descriptor.o network_socket.o thread_channel.o
 	mkdir -p test/

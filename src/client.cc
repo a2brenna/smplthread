@@ -6,6 +6,7 @@
 #include <memory> //for unique_ptr
 #include <iostream>
 #include <chrono>
+#include <thread>
 
 void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address){
         std::string message;
@@ -27,7 +28,14 @@ void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address)
         std::cout << "Elapsed " << (end_time - start_time).count() << std::endl;
 }
 
+void peer(){
+
+}
+
 int main(){
+
+    auto t = std::thread(peer);
+    t.detach();
 
     std::unique_ptr<smpl::Remote_Address> server_a( new Remote_UDS("/tmp/channel_test.sock"));
     std::unique_ptr<smpl::Remote_Address> server_b( new Remote_Port("127.0.0.1", 6000));
