@@ -43,6 +43,7 @@ int main(){
 
     std::unique_ptr<smpl::Local_Address> server_c( new Thread_Listener() );
 
+    //TODO: test with multiple client threads
     const pthread_t _self = pthread_self();
     std::function<void()> peer_thread = std::bind(peer, _self);
     auto t = std::thread(peer_thread);
