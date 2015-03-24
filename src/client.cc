@@ -28,13 +28,10 @@ void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address)
 }
 
 int main(){
-    try{
-        std::unique_ptr<smpl::Remote_Address> server_a( new Remote_UDS("/tmp/channel_test.sock"));
-        std::unique_ptr<smpl::Remote_Address> server_b( new Remote_Port("127.0.0.1", 6000));
-        test_mechanism(server_a);
-        test_mechanism(server_b);
-    }
-    catch(...){
-        return -1;
-    }
+
+    std::unique_ptr<smpl::Remote_Address> server_a( new Remote_UDS("/tmp/channel_test.sock"));
+    std::unique_ptr<smpl::Remote_Address> server_b( new Remote_Port("127.0.0.1", 6000));
+    test_mechanism(server_a);
+    test_mechanism(server_b);
+
 }
