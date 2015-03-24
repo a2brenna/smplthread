@@ -2,6 +2,7 @@
 #include "unix_domain_socket.h"
 #include "network_socket.h"
 #include "hgutil/time.h"
+#include "thread_channel.h"
 
 #include <memory> //for unique_ptr
 #include <iostream>
@@ -28,18 +29,30 @@ void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address)
         std::cout << "Elapsed " << (end_time - start_time).count() << std::endl;
 }
 
-void peer(){
-
+void peer(const pthread_t parent){
+    std::unique_ptr<smpl::Remote_Address> server( new Thread_ID(parent));
+    test_mechanism(server);
 }
 
 int main(){
-
-    auto t = std::thread(peer);
-    t.detach();
 
     std::unique_ptr<smpl::Remote_Address> server_a( new Remote_UDS("/tmp/channel_test.sock"));
     std::unique_ptr<smpl::Remote_Address> server_b( new Remote_Port("127.0.0.1", 6000));
     test_mechanism(server_a);
     test_mechanism(server_b);
+
+    std::unique_ptr<smpl::Local_Address> server_c( new Thread_Listener() );
+
+    const pthread_t _self = pthread_self();
+    std::function<void()> peer_thread = std::bind(peer, _self);
+    auto t = std::thread(peer_thread);
+
+    std::unique_ptr<smpl::Channel> client_thread( server_c->listen() );
+
+    std::cout << client_thread->recv() << std::endl;
+    client_thread->send("World");
+    t.join();
+
+    return 0;
 
 }
