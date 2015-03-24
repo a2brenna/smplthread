@@ -9,6 +9,8 @@ void test_mechanism(const std::unique_ptr<smpl::Local_Address> &listen_point){
     std::unique_ptr<smpl::Channel> client(listen_point->listen());
     std::string message = client->recv();
     std::cout << message << std::endl;
+
+    client->send("World");
 }
 
 int main(){

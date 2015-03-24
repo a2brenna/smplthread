@@ -21,6 +21,9 @@ void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address)
         }
         const auto end_time = std::chrono::high_resolution_clock::now();
 
+        const std::string response = c->recv();
+        std::cout << response << std::endl;
+
         std::cout << "Elapsed " << (end_time - start_time).count() << std::endl;
 }
 
