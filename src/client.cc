@@ -62,28 +62,27 @@ int main(){
         std::function<void()> peer_thread_gaf = std::bind(peer, _self);
         auto t_gaf = std::thread(peer_thread_gaf);
 
-        std::unique_ptr<smpl::Channel> client_thread_gaf( server_c->listen() );
-        std::unique_ptr<smpl::Channel> client_thread_bar( server_c->listen() );
-        std::unique_ptr<smpl::Channel> client_thread_baz( server_c->listen() );
-        std::unique_ptr<smpl::Channel> client_thread_sal( server_c->listen() );
         std::unique_ptr<smpl::Channel> client_thread_foo( server_c->listen() );
-
         std::cout << client_thread_foo->recv() << std::endl;
         client_thread_foo->send("World");
         t_foo.join();
 
+        std::unique_ptr<smpl::Channel> client_thread_bar( server_c->listen() );
         std::cout << client_thread_bar->recv() << std::endl;
         client_thread_bar->send("World");
         t_bar.join();
 
+        std::unique_ptr<smpl::Channel> client_thread_baz( server_c->listen() );
         std::cout << client_thread_baz->recv() << std::endl;
         client_thread_baz->send("World");
         t_baz.join();
 
+        std::unique_ptr<smpl::Channel> client_thread_sal( server_c->listen() );
         std::cout << client_thread_sal->recv() << std::endl;
         client_thread_sal->send("World");
         t_sal.join();
 
+        std::unique_ptr<smpl::Channel> client_thread_gaf( server_c->listen() );
         std::cout << client_thread_gaf->recv() << std::endl;
         client_thread_gaf->send("World");
         t_gaf.join();
