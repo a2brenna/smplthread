@@ -6,6 +6,8 @@
 
 #include <cassert>
 
+#include <iostream>
+
 class One_Way {
 
     private:
@@ -94,6 +96,10 @@ smpl::Channel* Thread_Listener::listen(){
     {
         {
             std::unique_lock<std::mutex> l(connection_queues_lock);
+            auto q = connection_queues.at(_self);
+            std::cout << "Connection_queue @ " << &connection_queues << std::endl;
+            std::cout << "Queue @ " << &q << std::endl;
+            std::cout << "_self " << _self << std::endl;
             if(connection_queues[_self].empty()){ //No client currently blocked connecting
                 next = std::shared_ptr<Waiting_Connection>(new Waiting_Connection());
                 next->connection.server_receiver = receiver;
@@ -149,6 +155,10 @@ smpl::Channel* Thread_ID::connect(){
     {
         try{
             std::unique_lock<std::mutex> l(connection_queues_lock);
+            auto q = connection_queues.at(_peer);
+            std::cout << "Client " << "Connection_queue @ " << &connection_queues << std::endl;
+            std::cout << "Client " << "Queue @ " << &q << std::endl;
+            std::cout << "Client " << "_peer " << _peer << std::endl;
             if(connection_queues.at(_peer).empty() || connection_queues.at(_peer).front()->connection.server_receiver == nullptr){ //server not blocked or we're not next in line
                 next = std::shared_ptr<Waiting_Connection> (new Waiting_Connection());
                 next->connection.client_receiver = receiver;
