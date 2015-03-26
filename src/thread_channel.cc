@@ -27,7 +27,7 @@ class One_Way {
                 _has_msg.notify_one();
             }
             return;
-        };
+        }
         std::string recv(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
             while(_msgs.empty()){
@@ -39,13 +39,13 @@ class One_Way {
             const std::string m = _msgs.front();
             _msgs.pop_front();
             return m;
-        };
+        }
         void close(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
             closed = true;
             _has_msg.notify_all();
             return;
-        };
+        }
 };
 
 class Duplex{
@@ -56,7 +56,7 @@ class Duplex{
         Duplex(){
             server_receiver = nullptr;
             client_receiver = nullptr;
-        };
+        }
 
 };
 
@@ -205,7 +205,6 @@ Thread_Channel::Thread_Channel(std::shared_ptr<One_Way> sender, std::shared_ptr<
 }
 
 Thread_Channel::~Thread_Channel(){
-    //_sender->close();
     _receiver->close();
 }
 
