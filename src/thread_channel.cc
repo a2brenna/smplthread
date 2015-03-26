@@ -124,6 +124,7 @@ smpl::Channel* Thread_Listener::listen(){
         else{
             //signal
             assert(next->connection.client_receiver != nullptr);
+            assert(next->connection.server_receiver != nullptr);
             sender = next->connection.client_receiver;
             next->_c.notify_one();
         }
@@ -179,6 +180,7 @@ smpl::Channel* Thread_ID::connect(){
         else{
             //signal
             assert(next->connection.server_receiver != nullptr);
+            assert(next->connection.client_receiver != nullptr);
             sender = next->connection.server_receiver;
             next->_c.notify_one();
         }
