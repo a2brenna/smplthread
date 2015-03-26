@@ -16,8 +16,7 @@ class One_Way {
         std::condition_variable _has_msg;
 
     public:
-        One_Way(){
-        };
+        One_Way(){};
         void send(const std::string &next_msg){
             {
                 std::unique_lock<std::mutex> l(_msg_q_lock);
@@ -57,7 +56,7 @@ class Duplex{
         Duplex(){
             server_receiver = nullptr;
             client_receiver = nullptr;
-        }
+        };
 
 };
 
