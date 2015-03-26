@@ -11,12 +11,14 @@
 #include <thread>
 
 void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address){
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         std::unique_ptr<smpl::Channel> c( server_address->connect() );
-        c->send("Hello");
 
-        const std::string response = c->recv();
+        for(int i = 0; i < 1; i++){
+            c->send("Hello");
+            c->recv();
+        }
 }
 
 void peer(const pthread_t parent){
@@ -61,20 +63,22 @@ int main(){
             std::unique_ptr<smpl::Channel> client_thread_sal( server_c->listen() );
             std::unique_ptr<smpl::Channel> client_thread_baz( server_c->listen() );
 
-            //std::cout << client_thread_foo->recv() << std::endl;
-            client_thread_foo->send("World");
+            for(int i = 0; i < 1; i++){
+                client_thread_foo->send("World");
+                client_thread_foo->recv();
 
-            //std::cout << client_thread_bar->recv() << std::endl;
-            client_thread_bar->send("World");
+                client_thread_bar->send("World");
+                client_thread_bar->recv();
 
-            //std::cout << client_thread_baz->recv() << std::endl;
-            client_thread_baz->send("World");
+                client_thread_baz->send("World");
+                client_thread_baz->recv();
 
-            //std::cout << client_thread_sal->recv() << std::endl;
-            client_thread_sal->send("World");
+                client_thread_sal->send("World");
+                client_thread_sal->recv();
 
-            //std::cout << client_thread_gaf->recv() << std::endl;
-            client_thread_gaf->send("World");
+                client_thread_gaf->send("World");
+                client_thread_gaf->recv();
+            }
 
             t_foo.join();
             t_bar.join();
