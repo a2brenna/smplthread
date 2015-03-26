@@ -11,23 +11,12 @@
 #include <thread>
 
 void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address){
-        std::string message;
-        message.append("Hello");
-        for(int i = 0; i < 1; i++){
-            message.append("\nHello");
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-        const auto start_time = std::chrono::high_resolution_clock::now();
         std::unique_ptr<smpl::Channel> c( server_address->connect() );
-        for(int i = 0; i < 1; i++){
-            c->send(message);
-        }
-        const auto end_time = std::chrono::high_resolution_clock::now();
+        c->send("Hello");
 
         const std::string response = c->recv();
-        std::cout << response << std::endl;
-
-        std::cout << "Elapsed " << (end_time - start_time).count() << std::endl;
 }
 
 void peer(const pthread_t parent){
@@ -72,19 +61,19 @@ int main(){
             std::unique_ptr<smpl::Channel> client_thread_sal( server_c->listen() );
             std::unique_ptr<smpl::Channel> client_thread_baz( server_c->listen() );
 
-            std::cout << client_thread_foo->recv() << std::endl;
+            //std::cout << client_thread_foo->recv() << std::endl;
             client_thread_foo->send("World");
 
-            std::cout << client_thread_bar->recv() << std::endl;
+            //std::cout << client_thread_bar->recv() << std::endl;
             client_thread_bar->send("World");
 
-            std::cout << client_thread_baz->recv() << std::endl;
+            //std::cout << client_thread_baz->recv() << std::endl;
             client_thread_baz->send("World");
 
-            std::cout << client_thread_sal->recv() << std::endl;
+            //std::cout << client_thread_sal->recv() << std::endl;
             client_thread_sal->send("World");
 
-            std::cout << client_thread_gaf->recv() << std::endl;
+            //std::cout << client_thread_gaf->recv() << std::endl;
             client_thread_gaf->send("World");
 
             t_foo.join();
@@ -92,6 +81,7 @@ int main(){
             t_baz.join();
             t_sal.join();
             t_gaf.join();
+            std::cout << j << " " << i << std::endl;
         }
     }
 
