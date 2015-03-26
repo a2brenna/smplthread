@@ -90,43 +90,40 @@ smpl::Channel* Thread_Listener::listen(){
     std::shared_ptr<One_Way> receiver(new One_Way());
     std::shared_ptr<One_Way> sender;
     std::shared_ptr<Waiting_Connection> next;
-    {
-        {
-            std::unique_lock<std::mutex> l(connection_queues_lock);
-            if(connection_queues[_self].empty()){ //No client currently blocked connecting
-                next = std::shared_ptr<Waiting_Connection>(new Waiting_Connection());
-                next->connection.server_receiver = receiver;
-                connection_queues[_self].push_back(next);
-            }
-            else{
-                next = connection_queues[_self].front();
-                next->connection.server_receiver = receiver;
-                assert(next->connection.client_receiver != nullptr);
-                connection_queues[_self].pop_front();
-            }
-        }
-        assert(next->connection.server_receiver != nullptr);
-        {
-            std::unique_lock<std::mutex> l(next->_m);
-            if(next->connection.client_receiver == nullptr){
-                //wait
-                next->_c.wait(l);
-                assert(next->connection.client_receiver != nullptr);
-                sender = next->connection.client_receiver;
-            }
-            else{
-                //signal
-                assert(next->connection.client_receiver != nullptr);
-                sender = next->connection.client_receiver;
-                next->_c.notify_one();
-            }
-        }
 
+    {
+        std::unique_lock<std::mutex> l(connection_queues_lock);
+        if(connection_queues[_self].empty()){ //No client currently blocked connecting
+            next = std::shared_ptr<Waiting_Connection>(new Waiting_Connection());
+            next->connection.server_receiver = receiver;
+            connection_queues[_self].push_back(next);
+        }
+        else{
+            next = connection_queues[_self].front();
+            next->connection.server_receiver = receiver;
+            assert(next->connection.client_receiver != nullptr);
+            connection_queues[_self].pop_front();
+        }
+    }
+    assert(next->connection.server_receiver != nullptr);
+    {
+        std::unique_lock<std::mutex> l(next->_m);
+        if(next->connection.client_receiver == nullptr){
+            //wait
+            next->_c.wait(l);
+            assert(next->connection.client_receiver != nullptr);
+            sender = next->connection.client_receiver;
+        }
+        else{
+            //signal
+            assert(next->connection.client_receiver != nullptr);
+            sender = next->connection.client_receiver;
+            next->_c.notify_one();
+        }
     }
 
     assert(sender != nullptr);
     assert(receiver != nullptr);
-
     return (new Thread_Channel(sender, receiver));
 }
 
@@ -143,41 +140,38 @@ smpl::Channel* Thread_ID::connect(){
     std::shared_ptr<One_Way> receiver(new One_Way());
     std::shared_ptr<One_Way> sender;
     std::shared_ptr<Waiting_Connection> next;
-    {
-        try{
-            std::unique_lock<std::mutex> l(connection_queues_lock);
-            if(connection_queues.at(_peer).empty() || connection_queues.at(_peer).front()->connection.server_receiver == nullptr){ //server not blocked or we're not next in line
-                next = std::shared_ptr<Waiting_Connection> (new Waiting_Connection());
-                next->connection.client_receiver = receiver;
-                connection_queues.at(_peer).push_back(next);
-            }
-            else{ //server is blocked listening and we're next
-                next = connection_queues.at(_peer).front();
-                next->connection.client_receiver = receiver;
-                assert(next->connection.server_receiver != nullptr);
-                connection_queues.at(_peer).pop_front();
-            }
-        }
-        catch(std::out_of_range o){
-            throw smpl::Error("No listening thread");
-        }
-        assert(next->connection.client_receiver != nullptr);
-        {
-            //CONDITION VARIABLE SHENANIGANS
-            std::unique_lock<std::mutex> l(next->_m);
-            if(next->connection.server_receiver == nullptr){
-                //wait
-                next->_c.wait(l);
 
-                assert(next->connection.server_receiver != nullptr);
-                sender = next->connection.server_receiver;
-            }
-            else{
-                //signal
-                assert(next->connection.server_receiver != nullptr);
-                sender = next->connection.server_receiver;
-                next->_c.notify_one();
-            }
+    try{
+        std::unique_lock<std::mutex> l(connection_queues_lock);
+        if(connection_queues.at(_peer).empty() || connection_queues.at(_peer).front()->connection.server_receiver == nullptr){ //server not blocked or we're not next in line
+            next = std::shared_ptr<Waiting_Connection> (new Waiting_Connection());
+            next->connection.client_receiver = receiver;
+            connection_queues.at(_peer).push_back(next);
+        }
+        else{ //server is blocked listening and we're next
+            next = connection_queues.at(_peer).front();
+            next->connection.client_receiver = receiver;
+            assert(next->connection.server_receiver != nullptr);
+            connection_queues.at(_peer).pop_front();
+        }
+    }
+    catch(std::out_of_range o){
+        throw smpl::Error("No listening thread");
+    }
+    assert(next->connection.client_receiver != nullptr);
+    {
+        std::unique_lock<std::mutex> l(next->_m);
+        if(next->connection.server_receiver == nullptr){
+            //wait
+            next->_c.wait(l);
+            assert(next->connection.server_receiver != nullptr);
+            sender = next->connection.server_receiver;
+        }
+        else{
+            //signal
+            assert(next->connection.server_receiver != nullptr);
+            sender = next->connection.server_receiver;
+            next->_c.notify_one();
         }
     }
 
