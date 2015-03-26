@@ -109,8 +109,10 @@ smpl::Channel* Thread_Listener::listen(){
                 next = connection_queues[_self].front();
                 next->connection.server_receiver = receiver;
                 assert(next->connection.client_receiver != nullptr);
+                connection_queues[_self].pop_front();
             }
         }
+        assert(next->connection.server_receiver != nullptr);
         {
             //CONDITION VARIABLE SHENANIGANS
             std::unique_lock<std::mutex> l(next->_m);
@@ -127,10 +129,7 @@ smpl::Channel* Thread_Listener::listen(){
                 next->_c.notify_one();
             }
         }
-        {
-            std::unique_lock<std::mutex> l(connection_queues_lock);
-            connection_queues[_self].pop_front();
-        }
+
     }
 
     assert(sender != nullptr);
@@ -168,11 +167,13 @@ smpl::Channel* Thread_ID::connect(){
                 next = connection_queues.at(_peer).front();
                 next->connection.client_receiver = receiver;
                 assert(next->connection.server_receiver != nullptr);
+                connection_queues.at(_peer).pop_front();
             }
         }
         catch(std::out_of_range o){
             throw smpl::Error("No listening thread");
         }
+        assert(next->connection.client_receiver != nullptr);
         {
             //CONDITION VARIABLE SHENANIGANS
             std::unique_lock<std::mutex> l(next->_m);
