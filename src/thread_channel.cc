@@ -69,6 +69,13 @@ class Waiting_Connection{
 
         Duplex connection;
 
+        Waiting_Connection() : connection(){
+
+            assert(connection.server_receiver == nullptr);
+            assert(connection.client_receiver == nullptr);
+
+        }
+
 };
 
 
