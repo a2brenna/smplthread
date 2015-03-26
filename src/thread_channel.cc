@@ -40,7 +40,7 @@ class One_Way {
             return m;
         };
         void close(){
-            std::lock_guard<std::mutex> l(_msg_q_lock);
+            std::unique_lock<std::mutex> l(_msg_q_lock);
             closed = true;
             _has_msg.notify_all();
         };
@@ -74,7 +74,6 @@ class Waiting_Connection{
         }
 
 };
-
 
 std::mutex connection_queues_lock;
 std::map<pthread_t, std::deque<std::shared_ptr<Waiting_Connection>>> connection_queues;
@@ -134,7 +133,7 @@ smpl::Channel* Thread_Listener::listen(){
 }
 
 bool Thread_Listener::check(){
-    std::lock_guard<std::mutex> l(connection_queues_lock);
+    std::unique_lock<std::mutex> l(connection_queues_lock);
     return ( !connection_queues[_self].empty() );
 }
 
