@@ -117,8 +117,11 @@ smpl::Channel* Thread_Listener::listen(){
         if(next->connection.client_receiver == nullptr){
             //wait
             while(next->connection.client_receiver == nullptr){
+                assert(next->connection.client_receiver == nullptr);
+                assert(next->connection.server_receiver != nullptr);
                 next->_c.wait(l);
             }
+            assert(next->connection.server_receiver != nullptr);
             assert(next->connection.client_receiver != nullptr);
             sender = next->connection.client_receiver;
         }
@@ -174,8 +177,11 @@ smpl::Channel* Thread_ID::connect(){
         if(next->connection.server_receiver == nullptr){
             //wait
             while(next->connection.server_receiver == nullptr){
+                assert(next->connection.server_receiver == nullptr);
+                assert(next->connection.client_receiver != nullptr);
                 next->_c.wait(l);
             }
+            assert(next->connection.client_receiver != nullptr);
             assert(next->connection.server_receiver != nullptr);
             sender = next->connection.server_receiver;
         }
