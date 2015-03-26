@@ -98,16 +98,17 @@ smpl::Channel* Thread_Listener::listen(){
 
     {
         std::unique_lock<std::mutex> l(connection_queues_lock);
-        if(connection_queues[_self].empty()){ //No client currently blocked connecting
+        auto *q = &(connection_queues.at(_self));
+        if(q->empty()){ //No client currently blocked connecting
             next = std::shared_ptr<Waiting_Connection>(new Waiting_Connection());
             next->connection.server_receiver = receiver;
-            connection_queues[_self].push_back(next);
+            q->push_back(next);
         }
         else{
-            next = connection_queues[_self].front();
+            next = q->front();
             next->connection.server_receiver = receiver;
             assert(next->connection.client_receiver != nullptr);
-            connection_queues[_self].pop_front();
+            q->pop_front();
         }
     }
     assert(next->connection.server_receiver != nullptr);
@@ -151,16 +152,17 @@ smpl::Channel* Thread_ID::connect(){
 
     try{
         std::unique_lock<std::mutex> l(connection_queues_lock);
-        if(connection_queues.at(_peer).empty() || connection_queues.at(_peer).front()->connection.server_receiver == nullptr){ //server not blocked or we're not next in line
+        auto *q = &(connection_queues.at(_peer));
+        if(q->empty() || q->front()->connection.server_receiver == nullptr){ //server not blocked or we're not next in line
             next = std::shared_ptr<Waiting_Connection> (new Waiting_Connection());
             next->connection.client_receiver = receiver;
-            connection_queues.at(_peer).push_back(next);
+            q->push_back(next);
         }
         else{ //server is blocked listening and we're next
-            next = connection_queues.at(_peer).front();
+            next = q->front();
             next->connection.client_receiver = receiver;
             assert(next->connection.server_receiver != nullptr);
-            connection_queues.at(_peer).pop_front();
+            q->pop_front();
         }
     }
     catch(std::out_of_range o){
