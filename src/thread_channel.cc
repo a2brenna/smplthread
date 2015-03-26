@@ -116,7 +116,9 @@ smpl::Channel* Thread_Listener::listen(){
         std::unique_lock<std::mutex> l(next->_m);
         if(next->connection.client_receiver == nullptr){
             //wait
-            next->_c.wait(l);
+            while(next->connection.client_receiver == nullptr){
+                next->_c.wait(l);
+            }
             assert(next->connection.client_receiver != nullptr);
             sender = next->connection.client_receiver;
         }
@@ -169,7 +171,9 @@ smpl::Channel* Thread_ID::connect(){
         std::unique_lock<std::mutex> l(next->_m);
         if(next->connection.server_receiver == nullptr){
             //wait
-            next->_c.wait(l);
+            while(next->connection.server_receiver == nullptr){
+                next->_c.wait(l);
+            }
             assert(next->connection.server_receiver != nullptr);
             sender = next->connection.server_receiver;
         }
