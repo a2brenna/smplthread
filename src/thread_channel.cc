@@ -130,7 +130,7 @@ smpl::Channel* Thread_Listener::listen(){
             assert(next->connection.client_receiver != nullptr);
             assert(next->connection.server_receiver != nullptr);
             sender = next->connection.client_receiver;
-            next->_c.notify_one();
+            next->_c.notify_all();
         }
     }
 
@@ -190,7 +190,7 @@ smpl::Channel* Thread_ID::connect(){
             assert(next->connection.server_receiver != nullptr);
             assert(next->connection.client_receiver != nullptr);
             sender = next->connection.server_receiver;
-            next->_c.notify_one();
+            next->_c.notify_all();
         }
     }
 
