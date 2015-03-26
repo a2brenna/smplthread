@@ -18,16 +18,14 @@ class One_Way {
     public:
         One_Way(){};
         void send(const std::string &next_msg){
-            {
-                std::unique_lock<std::mutex> l(_msg_q_lock);
-                if(closed){
-                    throw smpl::Error("Closed");
-                }
-                else{
-                    _msgs.push_back(next_msg);
-                }
+            std::unique_lock<std::mutex> l(_msg_q_lock);
+            if(closed){
+                throw smpl::Error("Closed");
             }
-            _has_msg.notify_one();
+            else{
+                _msgs.push_back(next_msg);
+                _has_msg.notify_one();
+            }
         };
         std::string recv(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
