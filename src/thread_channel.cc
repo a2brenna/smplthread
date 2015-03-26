@@ -205,8 +205,10 @@ Thread_Channel::Thread_Channel(std::shared_ptr<One_Way> sender, std::shared_ptr<
 }
 
 Thread_Channel::~Thread_Channel(){
+    /*
     _sender->close();
     _receiver->close();
+    */
 }
 
 void Thread_Channel::send(const std::string &msg){
