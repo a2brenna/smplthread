@@ -26,6 +26,7 @@ class One_Way {
                 _msgs.push_back(next_msg);
                 _has_msg.notify_one();
             }
+            return;
         };
         std::string recv(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
@@ -43,6 +44,7 @@ class One_Way {
             std::unique_lock<std::mutex> l(_msg_q_lock);
             closed = true;
             _has_msg.notify_all();
+            return;
         };
 };
 
@@ -199,6 +201,7 @@ Thread_Channel::~Thread_Channel(){
 
 void Thread_Channel::send(const std::string &msg){
     _sender->send(msg);
+    return;
 }
 
 std::string Thread_Channel::recv(){
