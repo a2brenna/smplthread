@@ -1,5 +1,5 @@
 #include "smpl.h"
-#include "thread_channel.h"
+#include "smplthread.h"
 #include "smplsocket.h"
 
 #include <memory> //for unique_ptr
