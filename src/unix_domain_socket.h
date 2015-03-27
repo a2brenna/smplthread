@@ -1,8 +1,7 @@
 #ifndef __UNIX_DOMAIN_SOCKET_H__
 #define __UNIX_DOMAIN_SOCKET_H__
 
-#include "remote_address.h"
-#include "local_address.h"
+#include "smpl.h"
 
 class Local_UDS : public smpl::Local_Address {
 

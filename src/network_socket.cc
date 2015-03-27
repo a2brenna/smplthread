@@ -1,6 +1,4 @@
-#include "network_socket.h"
-#include "file_descriptor.h"
-#include "error.h"
+#include "smplsocket.h"
 
 #include <netdb.h> //for struct addrinfo
 #include <sys/un.h> //for sockaddr_un

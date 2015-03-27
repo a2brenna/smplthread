@@ -1,8 +1,7 @@
 #ifndef __NETWORK_SOCKET_H__
 #define __NETWORK_SOCKET_H__
 
-#include "remote_address.h"
-#include "local_address.h"
+#include "smpl.h"
 
 class Local_Port: public smpl::Local_Address {
 

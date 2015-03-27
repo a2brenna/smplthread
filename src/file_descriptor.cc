@@ -1,5 +1,4 @@
-#include "file_descriptor.h"
-#include "error.h"
+#include "smplsocket.h"
 
 #include <arpa/inet.h> //for htonl
 #include <unistd.h>

@@ -1,4 +1,4 @@
-#include "thread_channel.h"
+#include "smplthread.h"
 
 #include <map>
 #include <deque>

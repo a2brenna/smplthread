@@ -1,6 +1,5 @@
-#include "channel.h"
-#include "unix_domain_socket.h"
-#include "network_socket.h"
+#include "smpl.h"
+#include "smplsocket.h"
 
 #include <memory> //for std::unique_ptr
 #include <iostream> //for std::cout

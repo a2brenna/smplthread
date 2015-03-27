@@ -1,8 +1,6 @@
-#include "channel.h"
-#include "unix_domain_socket.h"
-#include "network_socket.h"
-#include "hgutil/time.h"
+#include "smpl.h"
 #include "thread_channel.h"
+#include "smplsocket.h"
 
 #include <memory> //for unique_ptr
 #include <vector>

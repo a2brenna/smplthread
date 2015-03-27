@@ -1,7 +1,7 @@
 #ifndef __FILE_DESCRIPTOR_H__
 #define __FILE_DESCRIPTOR_H__
 
-#include "channel.h"
+#include "smpl.h"
 
 class File_Descriptor : public smpl::Channel {
 
