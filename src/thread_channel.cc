@@ -57,7 +57,12 @@ class One_Way {
         }
         void close(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
-            closed = true;
+            if(closed){
+                return;
+            }
+            else{
+                closed = true;
+            }
             _has_msg.notify_all();
             return;
         }
@@ -221,6 +226,7 @@ Thread_Channel::Thread_Channel(std::shared_ptr<One_Way> sender, std::shared_ptr<
 
 Thread_Channel::~Thread_Channel(){
     _receiver->close();
+    _sender->close();
 }
 
 void Thread_Channel::send(const std::string &msg){
