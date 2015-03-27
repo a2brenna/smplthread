@@ -11,13 +11,12 @@
 #include <thread>
 
 void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address){
-        //std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         std::unique_ptr<smpl::Channel> c( server_address->connect() );
 
         for(int i = 0; i < 1; i++){
             c->send("Hello");
-            c->recv();
+            std::string response = c->recv();
         }
 }
 
