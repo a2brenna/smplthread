@@ -9,11 +9,12 @@
 #include <deque>
 #include <condition_variable>
 #include <memory>
+#include <thread>
 
 class Thread_Listener : public smpl::Local_Address {
 
     private:
-        pthread_t _self;
+        std::thread::id _self;
 
     public:
 
@@ -28,11 +29,11 @@ class Thread_Listener : public smpl::Local_Address {
 class Thread_ID : public smpl::Remote_Address {
 
     private:
-        pthread_t _peer;
+        std::thread::id _peer;
 
     public:
 
-        Thread_ID(const pthread_t &peer);
+        Thread_ID(const std::thread::id &peer);
         virtual smpl::Channel* connect();
 
 };

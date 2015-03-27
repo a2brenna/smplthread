@@ -21,7 +21,7 @@ void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address)
         }
 }
 
-void peer(const pthread_t parent){
+void peer(const std::thread::id parent){
     std::unique_ptr<smpl::Remote_Address> server( new Thread_ID(parent));
     test_mechanism(server);
 }
@@ -30,7 +30,7 @@ int main(){
 
     const int TEST_RUNS = 10000;
     const int MSGS_PER_RUN = 10000;
-    const pthread_t _self = pthread_self();
+    const std::thread::id _self = std::this_thread::get_id();
 
     std::unique_ptr<smpl::Local_Address> server_c( new Thread_Listener() );
 

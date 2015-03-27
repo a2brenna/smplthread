@@ -81,10 +81,10 @@ class Waiting_Connection{
 };
 
 std::mutex connection_queues_lock;
-std::map<pthread_t, std::deque<std::shared_ptr<Waiting_Connection>>> connection_queues;
+std::map<std::thread::id, std::deque<std::shared_ptr<Waiting_Connection>>> connection_queues;
 
 Thread_Listener::Thread_Listener(){
-    _self = pthread_self();
+    _self = std::this_thread::get_id();
     std::lock_guard<std::mutex> l(connection_queues_lock);
     connection_queues[_self];
 }
@@ -147,7 +147,7 @@ bool Thread_Listener::check(){
     return ( !connection_queues[_self].empty() );
 }
 
-Thread_ID::Thread_ID(const pthread_t &peer){
+Thread_ID::Thread_ID(const std::thread::id &peer){
     _peer = peer;
 }
 
