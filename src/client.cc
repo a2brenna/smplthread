@@ -5,6 +5,7 @@
 #include "thread_channel.h"
 
 #include <memory> //for unique_ptr
+#include <vector>
 #include <set>
 #include <iostream>
 #include <chrono>
@@ -41,49 +42,30 @@ int main(){
     for(int j = 0; j < TEST_RUNS; j++){
         for(int i = 0; i < MSGS_PER_RUN; i++)
         {
-            std::function<void()> peer_thread_foo = std::bind(peer, _self);
-            auto t_foo = std::thread(peer_thread_foo);
+            int num_clients = 5;
+            std::vector<std::thread> threads;
+            for(int k = 0; k < num_clients; k++){
+                std::function<void()> peer_thread_foo = std::bind(peer, _self);
+                threads.push_back(std::thread(peer_thread_foo));
 
-            std::function<void()> peer_thread_bar = std::bind(peer, _self);
-            auto t_bar = std::thread(peer_thread_bar);
-
-            std::function<void()> peer_thread_baz = std::bind(peer, _self);
-            auto t_baz = std::thread(peer_thread_baz);
-
-            std::function<void()> peer_thread_sal = std::bind(peer, _self);
-            auto t_sal = std::thread(peer_thread_sal);
-
-            std::function<void()> peer_thread_gaf = std::bind(peer, _self);
-            auto t_gaf = std::thread(peer_thread_gaf);
-
-            std::unique_ptr<smpl::Channel> client_thread_foo( server_c->listen() );
-            std::unique_ptr<smpl::Channel> client_thread_gaf( server_c->listen() );
-            std::unique_ptr<smpl::Channel> client_thread_bar( server_c->listen() );
-            std::unique_ptr<smpl::Channel> client_thread_sal( server_c->listen() );
-            std::unique_ptr<smpl::Channel> client_thread_baz( server_c->listen() );
-
-            for(int i = 0; i < 1; i++){
-                client_thread_foo->send("World");
-                client_thread_foo->recv();
-
-                client_thread_bar->send("World");
-                client_thread_bar->recv();
-
-                client_thread_baz->send("World");
-                client_thread_baz->recv();
-
-                client_thread_sal->send("World");
-                client_thread_sal->recv();
-
-                client_thread_gaf->send("World");
-                client_thread_gaf->recv();
             }
 
-            t_foo.join();
-            t_bar.join();
-            t_baz.join();
-            t_sal.join();
-            t_gaf.join();
+            std::set<std::unique_ptr<smpl::Channel>> peers;
+            for(int k = 0; k < num_clients; k++){
+                peers.insert(std::unique_ptr<smpl::Channel>( server_c->listen()));
+            }
+
+            for(int i = 0; i < 1; i++){
+                for(auto &p: peers){
+                    p->send("World");
+                    std::string response = p->recv();
+                }
+            }
+
+            for(auto &t: threads){
+                t.join();
+            }
+
             std::cout << j << " " << i << std::endl;
         }
     }
