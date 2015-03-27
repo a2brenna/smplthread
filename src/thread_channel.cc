@@ -30,6 +30,9 @@ class One_Way {
         }
         std::string recv(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
+            if(closed && _msgs.empty()){
+                throw smpl::Error("Closed");
+            }
             while(_msgs.empty()){
                 _has_msg.wait(l);
                 if(closed){
