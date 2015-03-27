@@ -35,8 +35,20 @@ class One_Way {
             }
             while(_msgs.empty()){
                 _has_msg.wait(l);
-                if(closed){
+                if(closed && _msgs.empty()){
                     throw smpl::Error("Closed");
+                }
+                else if(closed && !_msgs.empty()){
+                    break;
+                }
+                else if(!closed && !_msgs.empty()){
+                    break;
+                }
+                else if(!closed && _msgs.empty()){
+                    assert(false);
+                }
+                else{
+                    assert(false);
                 }
             }
             const std::string m = _msgs.front();
