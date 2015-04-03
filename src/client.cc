@@ -1,7 +1,6 @@
 #include "smpl.h"
 #include "smplthread.h"
 #include "smplsocket.h"
-
 #include <memory> //for unique_ptr
 #include <vector>
 #include <set>
@@ -82,11 +81,14 @@ void thread_test(){
 }
 
 void socket_test(){
-/*
-    std::set<std::unique_ptr<smpl::Remote_Address>> peers;
-    peers.insert(new Remote_UDS("/tmp/channel_test.sock"));
-    peers.insert(new Remote_Port("127.0.0.1", 6000));
-*/
+    std::vector<std::unique_ptr<smpl::Remote_Address>> peers;
+    peers.push_back(std::unique_ptr<smpl::Remote_Address>(new Remote_UDS("/tmp/channel_test.sock")));
+    peers.push_back(std::unique_ptr<smpl::Remote_Address>(new Remote_Port("127.0.0.1", 6000)));
+    for(const auto &a: peers){
+        auto c = a->connect();
+        c->send("Test");
+        std::cout << c->recv() << std::endl;
+    }
 }
 
 void wait_test(){
