@@ -3,6 +3,10 @@
 
 #include "smpl.h"
 
+//TODO:Investigate how POSIX fds are reused and see if we can make guarantees
+//about whether or not the underlying fd has been changed here... maybe some
+//sort of global locked registry?
+
 class File_Descriptor : public smpl::Channel {
 
     private:
