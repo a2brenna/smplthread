@@ -60,3 +60,17 @@ std::string File_Descriptor::recv(){
 
     return msg;
 }
+
+void File_Descriptor::wait(){
+    fd_set set;
+    FD_SET(_fd, &set);
+
+    const int ret = select(_fd + 1, &set, nullptr, nullptr, nullptr);
+
+    if(ret < 0){
+        throw smpl::Error("Wait() failed");
+    }
+    else{
+        return;
+    }
+}

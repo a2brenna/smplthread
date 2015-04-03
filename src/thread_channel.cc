@@ -55,6 +55,32 @@ class One_Way {
             _msgs.pop_front();
             return m;
         }
+        void wait(){
+            std::unique_lock<std::mutex> l(_msg_q_lock);
+            if(closed && _msgs.empty()){
+                throw smpl::Error("Closed");
+            }
+            while(_msgs.empty()){
+                _has_msg.wait(l);
+                if(closed && _msgs.empty()){
+                    throw smpl::Error("Closed");
+                }
+                else if(closed && !_msgs.empty()){
+                    break;
+                }
+                else if(!closed && !_msgs.empty()){
+                    break;
+                }
+                else if(!closed && _msgs.empty()){
+                    assert(false);
+                }
+                else{
+                    assert(false);
+                }
+            }
+            return;
+
+        }
         void close(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed){
@@ -236,4 +262,8 @@ void Thread_Channel::send(const std::string &msg){
 
 std::string Thread_Channel::recv(){
     return _receiver->recv();
+}
+
+void Thread_Channel::wait(){
+    _receiver->wait();
 }

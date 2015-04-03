@@ -20,6 +20,7 @@ namespace smpl {
 
             virtual void send(const std::string &msg) = 0;
             virtual std::string recv() = 0;
+            virtual void wait() = 0;
 
     };
 

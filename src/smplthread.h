@@ -50,6 +50,7 @@ class Thread_Channel: public smpl::Channel {
 
         virtual void send(const std::string &msg);
         virtual std::string recv();
+        virtual void wait();
 
 };
 
