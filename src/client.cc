@@ -10,13 +10,27 @@
 #include <thread>
 
 void test_mechanism(const std::unique_ptr<smpl::Remote_Address> &server_address){
-
         std::unique_ptr<smpl::Channel> c( server_address->connect() );
 
         for(int i = 0; i < 1; i++){
             c->send("Hello");
             std::string response = c->recv();
         }
+}
+
+void test_mechanism2(const std::unique_ptr<smpl::Remote_Address> &server_address, const size_t &reps, const std::chrono::high_resolution_clock::duration &rate){
+        std::unique_ptr<smpl::Channel> c( server_address->connect() );
+
+        for(size_t i = 0; i < reps; i++){
+            c->send("Hello");
+            std::string response = c->recv();
+            std::this_thread::sleep_for(rate);
+        }
+}
+
+void peer2(const std::thread::id parent){
+    std::unique_ptr<smpl::Remote_Address> server( new Thread_ID(parent));
+    test_mechanism2(server, 5, std::chrono::seconds(5));
 }
 
 void peer(const std::thread::id parent){
@@ -69,13 +83,39 @@ void thread_test(){
 
 void socket_test(){
 /*
+    std::set<std::unique_ptr<smpl::Remote_Address>> peers;
     peers.insert(new Remote_UDS("/tmp/channel_test.sock"));
     peers.insert(new Remote_Port("127.0.0.1", 6000));
 */
 }
 
+void wait_test(){
+    const std::thread::id _self = std::this_thread::get_id();
+    std::unique_ptr<smpl::Local_Address> server_c( new Thread_Listener() );
+    std::unique_ptr<smpl::Remote_Address> peer;
+
+    std::function<void()> peer_thread = std::bind(peer2, _self);
+    auto t = std::thread(peer_thread);
+    auto c = server_c->listen();
+
+    for(;;){
+        try{
+            c->wait();
+            std::cout << c->recv() << std::endl;
+            c->send("World");
+        }
+        catch(smpl::Error e){
+            break;
+        }
+    }
+
+    t.join();
+
+}
+
 int main(){
-    thread_test();
+    //thread_test();
+    wait_test();
     return 0;
 
 }
