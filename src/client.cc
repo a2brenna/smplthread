@@ -24,8 +24,7 @@ void peer(const std::thread::id parent){
     test_mechanism(server);
 }
 
-int main(){
-
+void thread_test(){
     const int TEST_RUNS = 10000;
     const int MSGS_PER_RUN = 10000;
     const std::thread::id _self = std::this_thread::get_id();
@@ -33,9 +32,6 @@ int main(){
     std::unique_ptr<smpl::Local_Address> server_c( new Thread_Listener() );
 
     std::set<std::unique_ptr<smpl::Remote_Address>> peers;
-    //peers.insert(new Remote_UDS("/tmp/channel_test.sock"));
-    //peers.insert(new Remote_Port("127.0.0.1", 6000));
-
 
     for(int j = 0; j < TEST_RUNS; j++){
         for(int i = 0; i < MSGS_PER_RUN; i++)
@@ -68,6 +64,18 @@ int main(){
         }
     }
 
+
+}
+
+void socket_test(){
+/*
+    peers.insert(new Remote_UDS("/tmp/channel_test.sock"));
+    peers.insert(new Remote_Port("127.0.0.1", 6000));
+*/
+}
+
+int main(){
+    thread_test();
     return 0;
 
 }
