@@ -28,6 +28,7 @@ Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
         if ( r == nullptr ){
             throw smpl::Error("Failed to get addrinfo");
         }
+        //TODO:Fix this, does not work, need to use freeaddrinfo... maybe leave it in to see if static analysis tools catch this potential problem
         std::unique_ptr<struct addrinfo> res(r);
 
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -107,6 +108,7 @@ smpl::Channel* Remote_Port::connect(){
     if ( r == nullptr ){
         throw smpl::Error("Failed to get addrinfo");
     }
+    //TODO:Fix this, does not work, need to use freeaddrinfo
     std::unique_ptr<struct addrinfo> res(r);
 
     int sockfd = -1;
