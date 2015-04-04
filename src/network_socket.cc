@@ -19,39 +19,47 @@ Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
     s << port;
     const std::string port_string = s.str();
 
-    {
-        struct addrinfo *r = nullptr;
-        const int addrinfo_status = getaddrinfo(ip.c_str(), port_string.c_str(), nullptr, &r);
-        if (addrinfo_status != 0) {
-            throw smpl::Error("Bad addrinfo");
-        }
-        if ( r == nullptr ){
-            throw smpl::Error("Failed to get addrinfo");
-        }
-        //TODO:Fix this, does not work, need to use freeaddrinfo... maybe leave it in to see if static analysis tools catch this potential problem
-        std::unique_ptr<struct addrinfo> res(r);
+    struct addrinfo *r = nullptr;
+    const int addrinfo_status = getaddrinfo(ip.c_str(), port_string.c_str(), nullptr, &r);
+    if (addrinfo_status != 0) {
+        throw smpl::Error("Bad addrinfo");
+    }
+    if ( r == nullptr ){
+        throw smpl::Error("Failed to get addrinfo");
+    }
+    //TODO:Fix this, does not work, need to use freeaddrinfo... maybe leave it in to see if static analysis tools catch this potential problem
+    std::unique_ptr<struct addrinfo> res(r);
 
-        sockfd = socket(AF_INET, SOCK_STREAM, 0);
-        if (sockfd < 0) {
-            throw smpl::Error("Failed to open socket");
-        }
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        throw smpl::Error("Failed to open socket");
+    }
 
-        const int yes = 1;
-        const auto sa = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-        const auto sb = setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(int));
-        if ((sa != 0) || (sb != 0)) {
-            throw smpl::Error("Failed to set socket options");
-        }
+    const int yes = 1;
+    const auto sa = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+    const auto sb = setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(int));
+    if ((sa != 0) || (sb != 0)) {
+        throw smpl::Error("Failed to set socket options");
+    }
 
-        const int b = bind(sockfd, res->ai_addr, res->ai_addrlen);
-        if (b < 0) {
-            throw smpl::Error("Failed to bind() on socket");
+    bool bound = false;
+    for(auto s = res.get(); s != nullptr; s = s->ai_next){
+        const int b = bind(sockfd, s->ai_addr, s->ai_addrlen);
+        if (b == 0) {
+            bound = true;
+            break;
         }
+        else{
+            continue;
+        }
+    }
+    if( !bound ){
+        throw smpl::Error("Failed to bind() on socket");
+    }
 
-        const int l = ::listen(sockfd, SOMAXCONN);
-        if (l < 0) {
-            throw smpl::Error("Failed to listen() on socket");
-        }
+    const int l = ::listen(sockfd, SOMAXCONN);
+    if (l < 0) {
+        throw smpl::Error("Failed to listen() on socket");
     }
 }
 
