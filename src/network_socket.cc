@@ -111,14 +111,19 @@ smpl::Channel* Remote_Port::connect(){
 
     int sockfd = -1;
     for(auto s = res.get(); s != nullptr; s = s->ai_next){
-        sockfd = socket(AF_INET, SOCK_STREAM, 0);
-        if (sockfd < 0) {
+        int _s;
+        _s = socket(AF_INET, SOCK_STREAM, 0);
+        if (_s < 0) {
             throw smpl::Error("Failed to open socket");
         }
 
-        const int c = ::connect(sockfd, res->ai_addr, res->ai_addrlen);
+        const int c = ::connect(_s , res->ai_addr, res->ai_addrlen);
         if (c < 0) {
-            close(sockfd);
+            close(_s);
+        }
+        else{
+            sockfd = _s;
+            break;
         }
     }
     if(sockfd < 0){
