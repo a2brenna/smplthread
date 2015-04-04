@@ -117,7 +117,7 @@ smpl::Channel* Remote_Port::connect(){
             throw smpl::Error("Failed to open socket");
         }
 
-        const int c = ::connect(_s , res->ai_addr, res->ai_addrlen);
+        const int c = ::connect(_s , s->ai_addr, s->ai_addrlen);
         if (c < 0) {
             close(_s);
         }
