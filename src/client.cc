@@ -82,8 +82,8 @@ void thread_test(){
 
 void socket_test(){
     std::vector<std::unique_ptr<smpl::Remote_Address>> peers;
-    peers.push_back(std::unique_ptr<smpl::Remote_Address>(new Remote_UDS("/tmp/channel_test.sock")));
-    peers.push_back(std::unique_ptr<smpl::Remote_Address>(new Remote_Port("127.0.0.1", 6000)));
+    //peers.push_back(std::unique_ptr<smpl::Remote_Address>(new Remote_UDS("/tmp/channel_test.sock")));
+    peers.push_back(std::unique_ptr<smpl::Remote_Address>(new Remote_Port("taurine.uwaterloo.ca", 6000)));
     for(const auto &a: peers){
         auto c = a->connect();
         c->send("Test");
@@ -117,7 +117,8 @@ void wait_test(){
 
 int main(){
     //thread_test();
-    wait_test();
+    //wait_test();
+    socket_test();
     return 0;
 
 }

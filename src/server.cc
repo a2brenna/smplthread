@@ -15,9 +15,9 @@ void test_mechanism(const std::unique_ptr<smpl::Local_Address> &listen_point){
 int main(){
 
     for(;;){
-        std::unique_ptr<smpl::Local_Address> server_a(new Local_UDS("/tmp/channel_test.sock"));
+        //std::unique_ptr<smpl::Local_Address> server_a(new Local_UDS("/tmp/channel_test.sock"));
         std::unique_ptr<smpl::Local_Address> server_b(new Local_Port("127.0.0.1", 6000));
-        test_mechanism(server_a);
+        //test_mechanism(server_a);
         test_mechanism(server_b);
     }
 
