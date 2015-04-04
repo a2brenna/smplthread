@@ -5,6 +5,7 @@
 #include <sys/socket.h> //for socket
 #include <unistd.h> //for close
 #include <memory> //for unique_ptr
+#include "tripwire.h" //for safe use of freeaddrinfo()
 
 #include <sstream>
 
@@ -20,6 +21,8 @@ Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
     const std::string port_string = s.str();
 
     struct addrinfo *r = nullptr;
+    Tripwire t(std::bind(freeaddrinfo, r));
+
     const int addrinfo_status = getaddrinfo(ip.c_str(), port_string.c_str(), nullptr, &r);
     if (addrinfo_status != 0) {
         throw smpl::Error("Bad addrinfo");
@@ -27,8 +30,6 @@ Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
     if ( r == nullptr ){
         throw smpl::Error("Failed to get addrinfo");
     }
-    //TODO:Fix this, does not work, need to use freeaddrinfo... maybe leave it in to see if static analysis tools catch this potential problem
-    std::unique_ptr<struct addrinfo> res(r);
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
@@ -43,7 +44,7 @@ Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
     }
 
     bool bound = false;
-    for(auto s = res.get(); s != nullptr; s = s->ai_next){
+    for(auto s = r; s != nullptr; s = s->ai_next){
         const int b = bind(sockfd, s->ai_addr, s->ai_addrlen);
         if (b == 0) {
             bound = true;
@@ -109,6 +110,8 @@ smpl::Channel* Remote_Port::connect(){
     hints.ai_socktype = SOCK_STREAM;
 
     struct addrinfo *r = nullptr;
+    Tripwire t(std::bind(freeaddrinfo, r));
+
     const auto addrinfo_status = getaddrinfo(ip.c_str(), port_string.c_str(), &hints, &r);
     if (addrinfo_status != 0) {
         throw smpl::Error("Failed to get addrinfo");
@@ -116,11 +119,9 @@ smpl::Channel* Remote_Port::connect(){
     if ( r == nullptr ){
         throw smpl::Error("Failed to get addrinfo");
     }
-    //TODO:Fix this, does not work, need to use freeaddrinfo
-    std::unique_ptr<struct addrinfo> res(r);
 
     int sockfd = -1;
-    for(auto s = res.get(); s != nullptr; s = s->ai_next){
+    for(auto s = r; s != nullptr; s = s->ai_next){
         int _s;
         _s = socket(AF_INET, SOCK_STREAM, 0);
         if (_s < 0) {
