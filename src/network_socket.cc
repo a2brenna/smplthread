@@ -9,7 +9,7 @@
 
 #include <sstream>
 
-Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
+smpl::Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
 
     ip = new_ip;
     //check validity of ip
@@ -64,14 +64,14 @@ Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
     }
 }
 
-Local_Port::~Local_Port(){
+smpl::Local_Port::~Local_Port(){
     const int c = close(sockfd);
     if(c != 0){
         throw smpl::Error("Failed to cleanly close socket");
     }
 }
 
-smpl::Channel* Local_Port::listen(){
+smpl::Channel* smpl::Local_Port::listen(){
 
     const int a = accept(sockfd, nullptr, nullptr);
     if( a < 0 ){
@@ -87,19 +87,19 @@ smpl::Channel* Local_Port::listen(){
     return fd;
 }
 
-bool Local_Port::check(){
+bool smpl::Local_Port::check(){
 
     return false;
 }
 
-Remote_Port::Remote_Port(const std::string &new_ip, const int &new_port){
+smpl::Remote_Port::Remote_Port(const std::string &new_ip, const int &new_port){
     ip = new_ip;
     //check validity of ip
     port = new_port;
     //check range on port
 }
 
-smpl::Channel* Remote_Port::connect(){
+smpl::Channel* smpl::Remote_Port::connect(){
     std::stringstream s;
     s << port;
     const std::string port_string = s.str();
@@ -141,5 +141,5 @@ smpl::Channel* Remote_Port::connect(){
         throw smpl::Error("Failed to connect");
     }
 
-    return new File_Descriptor(sockfd);
+    return new smpl::File_Descriptor(sockfd);
 }

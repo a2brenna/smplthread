@@ -5,18 +5,18 @@
 
 #define READ_WINDOW 4096
 
-File_Descriptor::~File_Descriptor(){
+smpl::File_Descriptor::~File_Descriptor(){
     const int c = close(_fd);
     if (c != 0){
         throw smpl::Error("Failed to close socket");
     }
 }
 
-File_Descriptor::File_Descriptor(const int &fd){
+smpl::File_Descriptor::File_Descriptor(const int &fd){
     _fd = fd;
 }
 
-void File_Descriptor::send(const std::string &msg){
+void smpl::File_Descriptor::send(const std::string &msg){
     ssize_t msg_length = msg.length();
     uint32_t net_length = htonl(msg_length);
 
@@ -31,7 +31,7 @@ void File_Descriptor::send(const std::string &msg){
     }
 }
 
-std::string File_Descriptor::recv(){
+std::string smpl::File_Descriptor::recv(){
 
     uint32_t net_length;
 
@@ -61,7 +61,7 @@ std::string File_Descriptor::recv(){
     return msg;
 }
 
-void File_Descriptor::wait(){
+void smpl::File_Descriptor::wait(){
     fd_set set;
     FD_SET(_fd, &set);
 

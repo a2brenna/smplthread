@@ -7,7 +7,7 @@
 
 #define UNIX_MAX_PATH 108
 
-Local_UDS::Local_UDS(const std::string &new_path){
+smpl::Local_UDS::Local_UDS(const std::string &new_path){
 
     path = new_path;
     if ( path.size() > UNIX_MAX_PATH ){
@@ -56,7 +56,7 @@ Local_UDS::Local_UDS(const std::string &new_path){
 
 }
 
-Local_UDS::~Local_UDS(){
+smpl::Local_UDS::~Local_UDS(){
     const int c = close(sockfd);
     if(c != 0){
         throw smpl::Error("Failed to cleanly close socket");
@@ -67,7 +67,7 @@ Local_UDS::~Local_UDS(){
     }
 }
 
-smpl::Channel* Local_UDS::listen(){
+smpl::Channel* smpl::Local_UDS::listen(){
 
     const int a = accept(sockfd, nullptr, nullptr);
     if( a < 0 ){
@@ -83,19 +83,19 @@ smpl::Channel* Local_UDS::listen(){
     return fd;
 }
 
-bool Local_UDS::check(){
+bool smpl::Local_UDS::check(){
 
     return false;
 }
 
-Remote_UDS::Remote_UDS(const std::string &new_path){
+smpl::Remote_UDS::Remote_UDS(const std::string &new_path){
     path = new_path;
     if ( path.size() > UNIX_MAX_PATH ){
         throw smpl::Error("Path too long");
     }
 }
 
-smpl::Channel* Remote_UDS::connect(){
+smpl::Channel* smpl::Remote_UDS::connect(){
     const int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if( sockfd < 0 ){
         throw smpl::Error("Could not open socket");

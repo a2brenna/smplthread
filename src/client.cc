@@ -83,7 +83,7 @@ void thread_test(){
 void socket_test(){
     std::vector<std::unique_ptr<smpl::Remote_Address>> peers;
     //peers.push_back(std::unique_ptr<smpl::Remote_Address>(new Remote_UDS("/tmp/channel_test.sock")));
-    peers.push_back(std::unique_ptr<smpl::Remote_Address>(new Remote_Port("happiestface.convextech.ca", 6000)));
+    peers.push_back(std::unique_ptr<smpl::Remote_Address>(new smpl::Remote_Port("happiestface.convextech.ca", 6000)));
     for(const auto &a: peers){
         auto c = a->connect();
         c->send("Test");
