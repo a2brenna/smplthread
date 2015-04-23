@@ -17,6 +17,7 @@ smpl::File_Descriptor::File_Descriptor(const int &fd){
 }
 
 void smpl::File_Descriptor::send(const std::string &msg){
+    std::unique_lock<std::mutex> lock(_fd_lock);
     ssize_t msg_length = msg.length();
     uint32_t net_length = htonl(msg_length);
 
@@ -32,6 +33,7 @@ void smpl::File_Descriptor::send(const std::string &msg){
 }
 
 std::string smpl::File_Descriptor::recv(){
+    std::unique_lock<std::mutex> lock(_fd_lock);
 
     uint32_t net_length;
 
@@ -62,6 +64,7 @@ std::string smpl::File_Descriptor::recv(){
 }
 
 void smpl::File_Descriptor::wait(){
+    std::unique_lock<std::mutex> lock(_fd_lock);
     fd_set set;
     FD_SET(_fd, &set);
 

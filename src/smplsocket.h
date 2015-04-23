@@ -2,6 +2,7 @@
 #define __SMPLSOCKET_H___
 
 #include "smpl.h"
+#include <mutex>
 
 //TODO:Investigate how POSIX fds are reused and see if we can make guarantees
 //about whether or not the underlying fd has been changed here... maybe some
@@ -14,6 +15,7 @@ class File_Descriptor : public smpl::Channel {
 
     private:
         int _fd;
+        std::mutex _fd_lock;
 
     public:
 
