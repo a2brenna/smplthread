@@ -15,7 +15,8 @@ class File_Descriptor : public smpl::Channel {
 
     private:
         int _fd;
-        std::mutex _fd_lock;
+        std::mutex _read_lock;
+        std::mutex _write_lock;
 
     public:
 
