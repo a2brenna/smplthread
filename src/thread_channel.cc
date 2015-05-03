@@ -20,7 +20,7 @@ class One_Way {
         void send(const std::string &next_msg){
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed){
-                throw smpl::Error("Closed");
+                throw smpl::Channel_Closed();
             }
             else{
                 _msgs.push_back(next_msg);
@@ -31,12 +31,12 @@ class One_Way {
         std::string recv(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed && _msgs.empty()){
-                throw smpl::Error("Closed");
+                throw smpl::Channel_Closed();
             }
             while(_msgs.empty()){
                 _has_msg.wait(l);
                 if(closed && _msgs.empty()){
-                    throw smpl::Error("Closed");
+                    throw smpl::Channel_Closed();
                 }
                 else if(closed && !_msgs.empty()){
                     break;
@@ -58,12 +58,12 @@ class One_Way {
         void wait(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed && _msgs.empty()){
-                throw smpl::Error("Closed");
+                throw smpl::Channel_Closed();
             }
             while(_msgs.empty()){
                 _has_msg.wait(l);
                 if(closed && _msgs.empty()){
-                    throw smpl::Error("Closed");
+                    throw smpl::Channel_Closed();
                 }
                 else if(closed && !_msgs.empty()){
                     break;
@@ -215,7 +215,7 @@ smpl::Channel* Thread_ID::connect(){
         }
     }
     catch(std::out_of_range o){
-        throw smpl::Error("No listening thread");
+        throw smpl::Connection_Failed();
     }
     assert(next->connection.client_receiver != nullptr);
     {

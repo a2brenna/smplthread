@@ -44,20 +44,17 @@ namespace smpl {
 
     };
 
-    class Error {
+    class Bad_Address {};
 
-        private:
-            std::string _m;
+    class Channel_Closed {};
 
-        public:
-            std::string msg() const {
-                return _m;
-            };
-            Error(const std::string &new_msg) {
-                _m = new_msg;
-            };
+    class Connection_Failed {};
 
-    };
+    class Transport_Failed {};
+
+    class Open_Failed {};
+
+    class Close_Failed {};
 
 }
 

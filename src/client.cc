@@ -106,7 +106,7 @@ void wait_test(){
             std::cout << c->recv() << std::endl;
             c->send("World");
         }
-        catch(smpl::Error e){
+        catch(...){
             break;
         }
     }

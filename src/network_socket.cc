@@ -25,22 +25,22 @@ smpl::Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
 
     const int addrinfo_status = getaddrinfo(ip.c_str(), port_string.c_str(), nullptr, &r);
     if (addrinfo_status != 0) {
-        throw smpl::Error("Bad addrinfo");
+        throw smpl::Connection_Failed();
     }
     if ( r == nullptr ){
-        throw smpl::Error("Failed to get addrinfo");
+        throw smpl::Connection_Failed();
     }
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
-        throw smpl::Error("Failed to open socket");
+        throw smpl::Connection_Failed();
     }
 
     const int yes = 1;
     const auto sa = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
     const auto sb = setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(int));
     if ((sa != 0) || (sb != 0)) {
-        throw smpl::Error("Failed to set socket options");
+        throw smpl::Connection_Failed();
     }
 
     bool bound = false;
@@ -55,19 +55,19 @@ smpl::Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
         }
     }
     if( !bound ){
-        throw smpl::Error("Failed to bind() on socket");
+        throw smpl::Connection_Failed();
     }
 
     const int l = ::listen(sockfd, SOMAXCONN);
     if (l < 0) {
-        throw smpl::Error("Failed to listen() on socket");
+        throw smpl::Connection_Failed();
     }
 }
 
 smpl::Local_Port::~Local_Port(){
     const int c = close(sockfd);
     if(c != 0){
-        throw smpl::Error("Failed to cleanly close socket");
+        throw smpl::Connection_Failed();
     }
 }
 
@@ -75,13 +75,13 @@ smpl::Channel* smpl::Local_Port::listen(){
 
     const int a = accept(sockfd, nullptr, nullptr);
     if( a < 0 ){
-        throw smpl::Error("Failed to get incoming connection");
+        throw smpl::Connection_Failed();
     }
 
     const auto fd = new File_Descriptor(a);
 
     if( fd == NULL ){
-        throw smpl::Error("Failed to create File_Descriptor");
+        throw smpl::Connection_Failed();
     }
 
     return fd;
@@ -114,10 +114,10 @@ smpl::Channel* smpl::Remote_Port::connect(){
 
     const auto addrinfo_status = getaddrinfo(ip.c_str(), port_string.c_str(), &hints, &r);
     if (addrinfo_status != 0) {
-        throw smpl::Error("Failed to get addrinfo");
+        throw smpl::Connection_Failed();
     }
     if ( r == nullptr ){
-        throw smpl::Error("Failed to get addrinfo");
+        throw smpl::Connection_Failed();
     }
 
     int sockfd = -1;
@@ -125,7 +125,7 @@ smpl::Channel* smpl::Remote_Port::connect(){
         int _s;
         _s = socket(AF_INET, SOCK_STREAM, 0);
         if (_s < 0) {
-            throw smpl::Error("Failed to open socket");
+            throw smpl::Connection_Failed();
         }
 
         const int c = ::connect(_s , s->ai_addr, s->ai_addrlen);
@@ -138,7 +138,7 @@ smpl::Channel* smpl::Remote_Port::connect(){
         }
     }
     if(sockfd < 0){
-        throw smpl::Error("Failed to connect");
+        throw smpl::Connection_Failed();
     }
 
     return new smpl::File_Descriptor(sockfd);

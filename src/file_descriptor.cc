@@ -8,7 +8,7 @@
 smpl::File_Descriptor::~File_Descriptor(){
     const int c = close(_fd);
     if (c != 0){
-        throw smpl::Error("Failed to close socket");
+        throw smpl::Close_Failed();
     }
 }
 
@@ -24,12 +24,12 @@ void smpl::File_Descriptor::send(const std::string &msg){
 
     const auto l = ::send(_fd, &net_length, 4, MSG_NOSIGNAL);
     if ( l < 0 ){
-        throw smpl::Error("Failed to send msg length");
+        throw smpl::Transport_Failed();
     }
 
     const auto s = ::send(_fd, msg.c_str(), msg_length, MSG_NOSIGNAL);
     if ( s != msg_length ){
-        throw smpl::Error("Failed to send msg");
+        throw smpl::Transport_Failed();
     }
 }
 
@@ -39,7 +39,7 @@ std::string smpl::File_Descriptor::recv(){
     uint32_t net_length;
 
     if ( ::recv(_fd, &net_length, 4, MSG_NOSIGNAL) != 4){
-        throw smpl::Error("Failed to receive msg length");
+        throw smpl::Transport_Failed();
     }
 
     uint32_t bytes_remaining = ntohl(net_length);
@@ -53,7 +53,7 @@ std::string smpl::File_Descriptor::recv(){
 
         const int ret = ::recv(_fd, buff, to_read, MSG_NOSIGNAL);
         if (ret < 0) {
-            throw smpl::Error("Recv loop failed");
+            throw smpl::Transport_Failed();
         }
         else {
             msg.append(buff, ret);
@@ -72,7 +72,7 @@ void smpl::File_Descriptor::wait(){
     const int ret = select(_fd + 1, &set, nullptr, nullptr, nullptr);
 
     if(ret < 0){
-        throw smpl::Error("Wait() failed");
+        throw smpl::Transport_Failed();
     }
     else{
         return;
