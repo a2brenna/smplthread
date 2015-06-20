@@ -18,8 +18,8 @@ class Thread_Listener : public smpl::Local_Address {
         Thread_Listener();
 
         virtual ~Thread_Listener();
-        virtual smpl::Channel* listen();
-        virtual bool check();
+        virtual smpl::Channel* listen() noexcept;
+        virtual bool check() noexcept;
 
 };
 
@@ -31,7 +31,7 @@ class Thread_ID : public smpl::Remote_Address {
     public:
 
         Thread_ID(const std::thread::id &peer);
-        virtual smpl::Channel* connect();
+        virtual smpl::Channel* connect() noexcept;
 
 };
 
@@ -48,9 +48,9 @@ class Thread_Channel: public smpl::Channel {
         Thread_Channel(std::shared_ptr<One_Way> _sender, std::shared_ptr<One_Way> _receiver);
         virtual ~Thread_Channel();
 
-        virtual void send(const std::string &msg);
-        virtual std::string recv();
-        virtual void wait();
+        virtual void send(const std::string &msg) noexcept;
+        virtual std::string recv() noexcept;
+        virtual void wait() noexcept;
 
 };
 

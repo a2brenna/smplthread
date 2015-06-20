@@ -18,16 +18,16 @@ namespace smpl {
 
             Channel() {};
 
-            virtual void send(const std::string &msg) = 0;
-            virtual std::string recv() = 0;
-            virtual void wait() = 0;
+            virtual void send(const std::string &msg) noexcept = 0;
+            virtual std::string recv() noexcept = 0;
+            virtual void wait() noexcept = 0;
 
     };
 
     class Remote_Address{
 
         public:
-            virtual Channel* connect() = 0;
+            virtual Channel* connect() noexcept = 0;
 
     };
 
@@ -39,8 +39,8 @@ namespace smpl {
 
             Local_Address() {};
             virtual ~Local_Address() {};
-            virtual Channel* listen() = 0;
-            virtual bool check() = 0;
+            virtual Channel* listen() noexcept = 0;
+            virtual bool check() noexcept = 0;
 
     };
 
