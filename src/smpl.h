@@ -46,15 +46,7 @@ namespace smpl {
 
     class Bad_Address {};
 
-    class Channel_Closed {};
-
-    class Connection_Failed {};
-
-    class Transport_Failed {};
-
     class Open_Failed {};
-
-    class Close_Failed {};
 
 }
 

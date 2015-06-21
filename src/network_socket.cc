@@ -25,22 +25,22 @@ smpl::Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
 
     const int addrinfo_status = getaddrinfo(ip.c_str(), port_string.c_str(), nullptr, &r);
     if (addrinfo_status != 0) {
-        throw smpl::Connection_Failed();
+        throw smpl::Open_Failed();
     }
     if ( r == nullptr ){
-        throw smpl::Connection_Failed();
+        throw smpl::Open_Failed();
     }
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
-        throw smpl::Connection_Failed();
+        throw smpl::Open_Failed();
     }
 
     const int yes = 1;
     const auto sa = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
     const auto sb = setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(int));
     if ((sa != 0) || (sb != 0)) {
-        throw smpl::Connection_Failed();
+        throw smpl::Open_Failed();
     }
 
     bool bound = false;
@@ -55,12 +55,12 @@ smpl::Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
         }
     }
     if( !bound ){
-        throw smpl::Connection_Failed();
+        throw smpl::Open_Failed();
     }
 
     const int l = ::listen(sockfd, SOMAXCONN);
     if (l < 0) {
-        throw smpl::Connection_Failed();
+        throw smpl::Open_Failed();
     }
 }
 
