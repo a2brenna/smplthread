@@ -49,7 +49,7 @@ std::string smpl::File_Descriptor::recv(){
     while (msg.length() < bytes_remaining) {
         //PERHAPS REIMPLEMENT USING std::array<char>?
         char buff[READ_WINDOW];
-        size_t to_read = std::min((unsigned long)READ_WINDOW, bytes_remaining - msg.length());
+        size_t to_read = std::min((size_t)READ_WINDOW, bytes_remaining - msg.length());
 
         const int ret = ::recv(_fd, buff, to_read, MSG_NOSIGNAL);
         if (ret < 0) {
