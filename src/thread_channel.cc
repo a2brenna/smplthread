@@ -17,26 +17,26 @@ class One_Way {
 
     public:
         One_Way(){};
-        void send(const std::string &next_msg){
+        ssize_t send(const std::string &next_msg) noexcept{
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed){
-                throw smpl::Channel_Closed();
+                return -1;
             }
             else{
                 _msgs.push_back(next_msg);
                 _has_msg.notify_one();
             }
-            return;
+            return next_msg.size();
         }
-        std::string recv(){
+        std::string recv() noexcept{
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed && _msgs.empty()){
-                throw smpl::Channel_Closed();
+                return "";
             }
             while(_msgs.empty()){
                 _has_msg.wait(l);
                 if(closed && _msgs.empty()){
-                    throw smpl::Channel_Closed();
+                    return "";
                 }
                 else if(closed && !_msgs.empty()){
                     break;
@@ -55,15 +55,15 @@ class One_Way {
             _msgs.pop_front();
             return m;
         }
-        void wait(){
+        bool wait() noexcept{
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed && _msgs.empty()){
-                throw smpl::Channel_Closed();
+                return false;
             }
             while(_msgs.empty()){
                 _has_msg.wait(l);
                 if(closed && _msgs.empty()){
-                    throw smpl::Channel_Closed();
+                    return false;
                 }
                 else if(closed && !_msgs.empty()){
                     break;
@@ -78,7 +78,7 @@ class One_Way {
                     assert(false);
                 }
             }
-            return;
+            return true;
 
         }
         void close(){
@@ -294,30 +294,13 @@ Thread_Channel::~Thread_Channel(){
 }
 
 ssize_t Thread_Channel::send(const std::string &msg) noexcept{
-    try{
-        _sender->send(msg);
-    }
-    catch(...){
-        return -1;
-    }
-    return msg.size();
+    return _sender->send(msg);
 }
 
 std::string Thread_Channel::recv() noexcept{
-    try{
-        return _receiver->recv();
-    }
-    catch(...){
-        return "";
-    }
+    return _receiver->recv();
 }
 
 bool Thread_Channel::wait() noexcept{
-    try{
-        _receiver->wait();
-        return true;
-    }
-    catch(...){
-        return false;
-    }
+    return _receiver->wait();
 }
