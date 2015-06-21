@@ -7,11 +7,10 @@
 
 #define UNIX_MAX_PATH 108
 
-smpl::Local_UDS::Local_UDS(const std::string &new_path){
-
+bool smpl::Local_UDS::_initialize(const std::string &new_path) noexcept{
     path = new_path;
     if ( path.size() > UNIX_MAX_PATH ){
-        throw smpl::Bad_Address();
+        return false;
     }
 
     {
@@ -20,7 +19,7 @@ smpl::Local_UDS::Local_UDS(const std::string &new_path){
 
         const auto m = memset(&address, 0, sizeof(struct sockaddr_un));
         if( m != &address){
-            throw smpl::Open_Failed();
+            return false;
         }
 
         address.sun_family = AF_UNIX;
@@ -32,28 +31,29 @@ smpl::Local_UDS::Local_UDS(const std::string &new_path){
 
         sockfd =  socket(AF_UNIX, SOCK_STREAM, 0);
         if( sockfd < 0 ){
-            throw smpl::Open_Failed();
+            return false;
         }
 
         const int yes = 1;
         const auto a = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
         const auto b = setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(int));
         if ((a != 0) || (b != 0)) {
-            throw smpl::Open_Failed();
+            return false;
         }
 
         const int bind_result = bind(sockfd, res.ai_addr, res.ai_addrlen);
         if( bind_result < 0 ){
-            throw smpl::Open_Failed();
+            return false;
         }
 
         const int l = ::listen(sockfd, SOMAXCONN);
         if( l < 0 ){
-            throw smpl::Open_Failed();
+            return false;
         }
 
     }
 
+    return true;
 }
 
 smpl::Local_UDS::~Local_UDS(){
@@ -81,10 +81,14 @@ bool smpl::Local_UDS::check() noexcept{
     return false;
 }
 
-smpl::Remote_UDS::Remote_UDS(const std::string &new_path){
+bool smpl::Remote_UDS::_initialize(const std::string &new_path) noexcept{
     path = new_path;
-    if ( path.size() > UNIX_MAX_PATH ){
-        throw smpl::Bad_Address();
+    if ( new_path.size() > UNIX_MAX_PATH ){
+        return false;
+    }
+    else{
+        path = new_path;
+        return true;
     }
 }
 
