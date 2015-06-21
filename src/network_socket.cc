@@ -65,10 +65,7 @@ smpl::Local_Port::Local_Port(const std::string &new_ip, const int &new_port){
 }
 
 smpl::Local_Port::~Local_Port(){
-    const int c = close(sockfd);
-    if(c != 0){
-        throw smpl::Connection_Failed();
-    }
+    close(sockfd);
 }
 
 smpl::Channel* smpl::Local_Port::listen() noexcept{

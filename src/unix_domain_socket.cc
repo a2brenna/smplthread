@@ -57,14 +57,8 @@ smpl::Local_UDS::Local_UDS(const std::string &new_path){
 }
 
 smpl::Local_UDS::~Local_UDS(){
-    const int c = close(sockfd);
-    if(c != 0){
-        throw smpl::Close_Failed();
-    }
-    const int u = remove(path.c_str());
-    if(u < 0){
-        throw smpl::Close_Failed();
-    }
+    close(sockfd);
+    remove(path.c_str());
 }
 
 smpl::Channel* smpl::Local_UDS::listen() noexcept{

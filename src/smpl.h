@@ -14,7 +14,7 @@ namespace smpl {
 
         public:
 
-            virtual ~Channel() {};
+            virtual ~Channel() noexcept {};
 
             Channel() {};
 
@@ -38,7 +38,7 @@ namespace smpl {
         public:
 
             Local_Address() {};
-            virtual ~Local_Address() {};
+            virtual ~Local_Address() noexcept {};
             virtual Channel* listen() noexcept = 0;
             virtual bool check() noexcept = 0;
 

@@ -6,10 +6,7 @@
 #define READ_WINDOW 4096
 
 smpl::File_Descriptor::~File_Descriptor(){
-    const int c = close(_fd);
-    if (c != 0){
-        throw smpl::Close_Failed();
-    }
+    close(_fd);
 }
 
 smpl::File_Descriptor::File_Descriptor(const int &fd){
