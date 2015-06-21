@@ -293,7 +293,7 @@ Thread_Channel::~Thread_Channel(){
     _sender->close();
 }
 
-ssize_t Thread_Channel::send(const std::string &msg) noexcept{
+ssize_t Thread_Channel::_send(const std::string &msg) noexcept{
     return _sender->send(msg);
 }
 

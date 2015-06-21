@@ -12,13 +12,22 @@ namespace smpl {
 
         Channel(const Channel&) = delete;
 
+        private:
+            virtual ssize_t _send(const std::string &msg) noexcept = 0;
+
         public:
 
             virtual ~Channel() noexcept {};
 
             Channel() {};
 
-            virtual ssize_t send(const std::string &msg) noexcept = 0;
+            ssize_t send(const std::string &msg) noexcept {
+                if(msg.empty()){
+                    return -1;
+                }
+                else
+                    return _send(msg);
+            }
             virtual std::string recv() noexcept = 0;
             virtual bool wait() noexcept = 0;
 

@@ -13,7 +13,7 @@ smpl::File_Descriptor::File_Descriptor(const int &fd){
     _fd = fd;
 }
 
-ssize_t smpl::File_Descriptor::send(const std::string &msg) noexcept{
+ssize_t smpl::File_Descriptor::_send(const std::string &msg) noexcept{
     std::unique_lock<std::mutex> lock(_write_lock);
     ssize_t msg_length = msg.length();
     uint32_t net_length = htonl(msg_length);

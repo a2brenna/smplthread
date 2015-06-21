@@ -17,13 +17,13 @@ class File_Descriptor : public smpl::Channel {
         int _fd;
         std::mutex _read_lock;
         std::mutex _write_lock;
+        virtual ssize_t _send(const std::string &msg) noexcept;
 
     public:
 
         virtual ~File_Descriptor();
         File_Descriptor(const int &fd);
 
-        virtual ssize_t send(const std::string &msg) noexcept;
         virtual std::string recv() noexcept;
         virtual bool wait() noexcept;
 
