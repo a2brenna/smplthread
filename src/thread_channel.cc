@@ -137,8 +137,15 @@ Thread_Listener::~Thread_Listener(){
     connection_queues.erase(_self);
 }
 
-smpl::Channel* Thread_Listener::listen(){
-    std::shared_ptr<One_Way> receiver(new One_Way());
+smpl::Channel* Thread_Listener::listen() noexcept{
+    std::shared_ptr<One_Way> receiver;
+    try{
+        receiver.reset(new One_Way());
+    }
+    catch(...){
+        return nullptr;
+    }
+
     std::shared_ptr<One_Way> sender;
     std::shared_ptr<Waiting_Connection> next;
 
@@ -146,7 +153,12 @@ smpl::Channel* Thread_Listener::listen(){
         std::unique_lock<std::mutex> l(connection_queues_lock);
         auto *q = &(connection_queues.at(_self));
         if(q->empty()){ //No client currently blocked connecting
-            next = std::shared_ptr<Waiting_Connection>(new Waiting_Connection());
+            try{
+                next.reset(new Waiting_Connection());
+            }
+            catch(...){
+                return nullptr;
+            }
             next->connection.server_receiver = receiver;
             q->push_back(next);
         }
@@ -169,20 +181,27 @@ smpl::Channel* Thread_Listener::listen(){
             }
             assert(next->connection.server_receiver != nullptr);
             assert(next->connection.client_receiver != nullptr);
-            sender = next->connection.client_receiver;
+            sender = next->connection.client_receiver; //I think this throws no exceptions...
         }
         else{
             //signal
             assert(next->connection.client_receiver != nullptr);
             assert(next->connection.server_receiver != nullptr);
-            sender = next->connection.client_receiver;
+            sender = next->connection.client_receiver; //I think this throws no exceptions...
             next->_c.notify_all();
         }
     }
 
     assert(sender != nullptr);
     assert(receiver != nullptr);
-    return (new Thread_Channel(sender, receiver));
+    Thread_Channel *new_tc = nullptr;
+    try{
+        new_tc = new Thread_Channel(sender, receiver);
+    }
+    catch(...){
+        return nullptr;
+    }
+    return new_tc;
 }
 
 bool Thread_Listener::check(){
@@ -194,8 +213,15 @@ Thread_ID::Thread_ID(const std::thread::id &peer){
     _peer = peer;
 }
 
-smpl::Channel* Thread_ID::connect(){
-    std::shared_ptr<One_Way> receiver(new One_Way());
+smpl::Channel* Thread_ID::connect() noexcept{
+    std::shared_ptr<One_Way> receiver;
+    try{
+        receiver.reset(new One_Way());
+    }
+    catch(...){
+        return nullptr;
+    }
+
     std::shared_ptr<One_Way> sender;
     std::shared_ptr<Waiting_Connection> next;
 
@@ -203,7 +229,12 @@ smpl::Channel* Thread_ID::connect(){
         std::unique_lock<std::mutex> l(connection_queues_lock);
         auto *q = &(connection_queues.at(_peer));
         if(q->empty() || q->front()->connection.server_receiver == nullptr){ //server not blocked or we're not next in line
-            next = std::shared_ptr<Waiting_Connection> (new Waiting_Connection());
+            try{
+                next.reset(new Waiting_Connection());
+            }
+            catch(...){
+                return nullptr;
+            }
             next->connection.client_receiver = receiver;
             q->push_back(next);
         }
@@ -215,7 +246,7 @@ smpl::Channel* Thread_ID::connect(){
         }
     }
     catch(std::out_of_range o){
-        throw smpl::Connection_Failed();
+        return nullptr;
     }
     assert(next->connection.client_receiver != nullptr);
     {
@@ -242,7 +273,14 @@ smpl::Channel* Thread_ID::connect(){
 
     assert(sender != nullptr);
     assert(receiver != nullptr);
-    return (new Thread_Channel(sender, receiver));
+    Thread_Channel *new_tc = nullptr;
+    try{
+        new_tc  = new Thread_Channel(sender, receiver);
+    }
+    catch(...){
+        return nullptr;
+    }
+    return nullptr;
 }
 
 Thread_Channel::Thread_Channel(std::shared_ptr<One_Way> sender, std::shared_ptr<One_Way> receiver){

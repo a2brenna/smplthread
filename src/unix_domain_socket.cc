@@ -67,24 +67,23 @@ smpl::Local_UDS::~Local_UDS(){
     }
 }
 
-smpl::Channel* smpl::Local_UDS::listen(){
+smpl::Channel* smpl::Local_UDS::listen() noexcept{
 
     const int a = accept(sockfd, nullptr, nullptr);
     if( a < 0 ){
-        throw smpl::Connection_Failed();
+        return nullptr;
     }
 
     const auto fd = new File_Descriptor(a);
 
-    if( fd == NULL ){
-        throw smpl::Connection_Failed();
+    if( fd == nullptr ){
+        return nullptr;
     }
 
     return fd;
 }
 
-bool smpl::Local_UDS::check(){
-
+bool smpl::Local_UDS::check() noexcept{
     return false;
 }
 
@@ -95,10 +94,10 @@ smpl::Remote_UDS::Remote_UDS(const std::string &new_path){
     }
 }
 
-smpl::Channel* smpl::Remote_UDS::connect(){
+smpl::Channel* smpl::Remote_UDS::connect() noexcept{
     const int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if( sockfd < 0 ){
-        throw smpl::Connection_Failed();
+        return nullptr;
     }
 
     struct sockaddr_un remote;
@@ -108,12 +107,12 @@ smpl::Channel* smpl::Remote_UDS::connect(){
 
     const auto c = ::connect(sockfd, (struct sockaddr *)&remote, len);
     if( c != 0 ){
-        throw smpl::Connection_Failed();
+        return nullptr;
     }
 
     const auto fd = new File_Descriptor(sockfd);
-    if( fd == NULL ){
-        throw smpl::Connection_Failed();
+    if( fd == nullptr ){
+        return nullptr;
     }
 
     return fd;
