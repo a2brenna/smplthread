@@ -23,9 +23,9 @@ class File_Descriptor : public smpl::Channel {
         virtual ~File_Descriptor();
         File_Descriptor(const int &fd);
 
-        virtual void send(const std::string &msg) noexcept;
+        virtual ssize_t send(const std::string &msg) noexcept;
         virtual std::string recv() noexcept;
-        virtual void wait() noexcept;
+        virtual bool wait() noexcept;
 
 };
 

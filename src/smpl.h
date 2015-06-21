@@ -18,9 +18,9 @@ namespace smpl {
 
             Channel() {};
 
-            virtual void send(const std::string &msg) noexcept = 0;
+            virtual ssize_t send(const std::string &msg) noexcept = 0;
             virtual std::string recv() noexcept = 0;
-            virtual void wait() noexcept = 0;
+            virtual bool wait() noexcept = 0;
 
     };
 

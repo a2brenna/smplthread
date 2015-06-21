@@ -204,7 +204,7 @@ smpl::Channel* Thread_Listener::listen() noexcept{
     return new_tc;
 }
 
-bool Thread_Listener::check(){
+bool Thread_Listener::check() noexcept{
     std::unique_lock<std::mutex> l(connection_queues_lock);
     return ( !connection_queues[_self].empty() );
 }
@@ -293,15 +293,31 @@ Thread_Channel::~Thread_Channel(){
     _sender->close();
 }
 
-void Thread_Channel::send(const std::string &msg){
-    _sender->send(msg);
-    return;
+ssize_t Thread_Channel::send(const std::string &msg) noexcept{
+    try{
+        _sender->send(msg);
+    }
+    catch(...){
+        return -1;
+    }
+    return msg.size();
 }
 
-std::string Thread_Channel::recv(){
-    return _receiver->recv();
+std::string Thread_Channel::recv() noexcept{
+    try{
+        return _receiver->recv();
+    }
+    catch(...){
+        return "";
+    }
 }
 
-void Thread_Channel::wait(){
-    _receiver->wait();
+bool Thread_Channel::wait() noexcept{
+    try{
+        _receiver->wait();
+        return true;
+    }
+    catch(...){
+        return false;
+    }
 }

@@ -48,9 +48,9 @@ class Thread_Channel: public smpl::Channel {
         Thread_Channel(std::shared_ptr<One_Way> _sender, std::shared_ptr<One_Way> _receiver);
         virtual ~Thread_Channel();
 
-        virtual void send(const std::string &msg) noexcept;
+        virtual ssize_t send(const std::string &msg) noexcept;
         virtual std::string recv() noexcept;
-        virtual void wait() noexcept;
+        virtual bool wait() noexcept;
 
 };
 
