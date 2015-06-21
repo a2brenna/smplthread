@@ -46,8 +46,6 @@ namespace smpl {
 
     class Bad_Address {};
 
-    class Open_Failed {};
-
 }
 
 #endif
