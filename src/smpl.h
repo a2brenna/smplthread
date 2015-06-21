@@ -3,9 +3,6 @@
 
 #include <string>
 
-//TODO: Need to define subclasses for Error..
-//TODO: Need to define non-blocking variant of Channel::ready()
-
 namespace smpl {
 
     class Channel{
