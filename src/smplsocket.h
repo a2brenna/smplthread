@@ -6,7 +6,7 @@
 
 //TODO:Investigate how POSIX fds are reused and see if we can make guarantees
 //about whether or not the underlying fd has been changed here... maybe some
-//sort of global locked registry?
+//sort of global locked registry? Prayer?
 //
 
 namespace smpl{
