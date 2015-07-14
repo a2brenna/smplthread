@@ -5,6 +5,8 @@
 #include <mutex>
 #include <cassert>
 
+class One_Way_Failed {};
+
 class One_Way {
 
     private:
@@ -17,10 +19,10 @@ class One_Way {
 
     public:
         One_Way(){};
-        ssize_t send(const std::string &next_msg) noexcept{
+        ssize_t send(const std::string &next_msg){
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed){
-                return -1;
+                throw One_Way_Failed();
             }
             else{
                 _msgs.push_back(next_msg);
@@ -28,15 +30,15 @@ class One_Way {
             }
             return next_msg.size();
         }
-        std::string recv() noexcept{
+        std::string recv(){
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed && _msgs.empty()){
-                return "";
+                throw One_Way_Failed();
             }
             while(_msgs.empty()){
                 _has_msg.wait(l);
                 if(closed && _msgs.empty()){
-                    return "";
+                    throw One_Way_Failed();
                 }
                 else if(closed && !_msgs.empty()){
                     break;
@@ -55,15 +57,15 @@ class One_Way {
             _msgs.pop_front();
             return m;
         }
-        bool wait() noexcept{
+        smpl::CHANNEL_STATUS wait() noexcept{
             std::unique_lock<std::mutex> l(_msg_q_lock);
             if(closed && _msgs.empty()){
-                return false;
+                return smpl::CHANNEL_BLOCKED;
             }
             while(_msgs.empty()){
                 _has_msg.wait(l);
                 if(closed && _msgs.empty()){
-                    return false;
+                    return smpl::CHANNEL_BLOCKED;
                 }
                 else if(closed && !_msgs.empty()){
                     break;
@@ -78,7 +80,7 @@ class One_Way {
                     assert(false);
                 }
             }
-            return true;
+            return smpl::CHANNEL_READY;
 
         }
         void close(){
@@ -137,7 +139,7 @@ Thread_Listener::~Thread_Listener(){
     connection_queues.erase(_self);
 }
 
-smpl::Channel* Thread_Listener::listen() noexcept{
+smpl::Channel* Thread_Listener::_listen() noexcept{
     std::shared_ptr<One_Way> receiver;
     try{
         receiver.reset(new One_Way());
@@ -204,16 +206,22 @@ smpl::Channel* Thread_Listener::listen() noexcept{
     return new_tc;
 }
 
-bool Thread_Listener::check() noexcept{
+smpl::ADDRESS_STATUS Thread_Listener::check() noexcept{
     std::unique_lock<std::mutex> l(connection_queues_lock);
-    return ( !connection_queues[_self].empty() );
+    bool blocked = connection_queues[_self].empty();
+    if(blocked){
+        return smpl::ADDRESS_BLOCKED;
+    }
+    else{
+        return smpl::ADDRESS_READY;
+    }
 }
 
 Thread_ID::Thread_ID(const std::thread::id &peer){
     _peer = peer;
 }
 
-smpl::Channel* Thread_ID::connect() noexcept{
+smpl::Channel* Thread_ID::_connect() noexcept{
     std::shared_ptr<One_Way> receiver;
     try{
         receiver.reset(new One_Way());
@@ -294,13 +302,25 @@ Thread_Channel::~Thread_Channel(){
 }
 
 ssize_t Thread_Channel::_send(const std::string &msg) noexcept{
-    return _sender->send(msg);
+    try{
+        const ssize_t r = _sender->send(msg);
+        return r;
+    }
+    catch(One_Way_Failed e){
+        return -1;
+    }
 }
 
-std::string Thread_Channel::recv() noexcept{
-    return _receiver->recv();
+ssize_t Thread_Channel::_recv(std::string &msg) noexcept{
+    try{
+        msg = _receiver->recv();
+        return msg.size();
+    }
+    catch(One_Way_Failed e){
+        return -1;
+    }
 }
 
-bool Thread_Channel::wait() noexcept{
+smpl::CHANNEL_STATUS Thread_Channel::wait() noexcept{
     return _receiver->wait();
 }
